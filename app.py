@@ -1,33 +1,63 @@
 import streamlit as st
 import json
 import random
+import os
 from utils.question_loader import load_questions
 
-st.set_page_config(page_title="Math de Elliott", layout="wide")
-st.title("🧠 Math de Elliott")
 
-level = st.selectbox("Select Level", ["Standard2", "Extension1", "Extension2"])
-section_options = {
-    "Standard2": ["Functions"],
-    "Extension1": ["Derivatives"],
-    "Extension2": ["Integrals"]
-}
-section = st.selectbox("Select Section", section_options[level])
 
-if "questions" not in st.session_state:
-    st.session_state.questions = []
 
-if st.button("Generate Questions"):
-    st.session_state.questions = load_questions(level, section, 10)
+# -------------------------
+# Page Title and Layout
+# -------------------------
+st.set_page_config(page_title="HSC Math Question Bank", layout="wide")
+st.title("📘 HSC Math Question Explorer")
 
-if st.session_state.questions:
-    st.markdown(f"### Showing 10 Questions for {level} - {section}")
-    for i, q in enumerate(st.session_state.questions, 1):
-        st.markdown(f"**Q{i}. {q['question']}**")
-        with st.expander("Show Answer & Explanation"):
-            st.markdown(f"✅ **Answer:** {q['answer']}")
-            st.markdown(f"🧠 *Explanation:* {q['explanation']}")
-        st.markdown("---")
+# -------------------------
+# Sidebar Filters
+# -------------------------
+st.sidebar.header("🔍 Filter Questions")
 
-    if st.button("More Questions?"):
-        st.session_state.questions = load_questions(level, section, 10)
+# Load JSON data
+question_dir = "questions"
+question_files = [f for f in os.listdir(question_dir) if f.endswith(".json")]
+
+all_questions = []
+for file in question_files:
+    with open(os.path.join(question_dir, file), "r", encoding="utf-8") as f:
+        data = json.load(f)
+        all_questions.extend(data)
+
+# Extract unique filter options
+years = sorted(set(q["year"] for q in all_questions))
+levels = sorted(set(q["level"] for q in all_questions))
+chapters = sorted(set(q["chapter"] for q in all_questions))
+
+# Sidebar selectors
+selected_year = st.sidebar.selectbox("📅 Select Year", ["All"] + years)
+selected_level = st.sidebar.selectbox("📘 Select Level", ["All"] + levels)
+selected_chapter = st.sidebar.selectbox("📚 Select Module", ["All"] + chapters)
+
+# Filter logic
+filtered_questions = [
+    q for q in all_questions
+    if (selected_year == "All" or q["year"] == selected_year)
+    and (selected_level == "All" or q["level"] == selected_level)
+    and (selected_chapter == "All" or q["chapter"] == selected_chapter)
+]
+
+# -------------------------
+# Display Results
+# -------------------------
+if not filtered_questions:
+    st.warning("No questions match your current filters.")
+else:
+    for idx, q in enumerate(filtered_questions, start=1):
+        with st.expander(f"Q{idx}: {q['question']}"):
+            for i, option in enumerate(q["options"]):
+                st.write(f"({chr(65 + i)}) {option}")
+            st.markdown(f"**✅ Answer**: `{q['answer']}`")
+            st.markdown(f"**🧠 Explanation**: {q['solution']}")
+            st.markdown(
+                f"*Difficulty: `{q['difficulty']}` | Year: `{q['year']}` | Level: `{q['level']}`*"
+            )
