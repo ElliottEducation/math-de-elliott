@@ -1,0 +1,52 @@
+[
+  {
+    "chapter": "Proof and Induction",
+    "question": "What is the first step in mathematical induction?",
+    "options": ["Prove for base case", "Assume true for n = k", "Prove for n = k + 1", "Substitute n = k"],
+    "answer": "Prove for base case",
+    "solution": "Step 1 is proving the base case (usually n = 1).",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1"
+  },
+  {
+    "chapter": "Proof and Induction",
+    "question": "Which of the following is the inductive step?",
+    "options": ["Show P(k) → P(k+1)", "Prove P(1)", "Substitute n = 1", "Evaluate sum"],
+    "answer": "Show P(k) → P(k+1)",
+    "solution": "Inductive step shows if P(k) is true then P(k+1) is true.",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1"
+  },
+  {
+    "chapter": "Proof and Induction",
+    "question": "Prove by induction: 1 + 2 + ... + n = n(n+1)/2. What is the inductive hypothesis?",
+    "options": ["Assume true for n = k", "Assume sum equals k", "Base case is true", "None"],
+    "answer": "Assume true for n = k",
+    "solution": "Inductive hypothesis assumes 1 + 2 + ... + k = k(k+1)/2.",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 1"
+  },
+  {
+    "chapter": "Proof and Induction",
+    "question": "In induction, what do we prove after assuming P(k)?",
+    "options": ["P(k+1)", "P(k)", "P(1)", "P(n)"],
+    "answer": "P(k+1)",
+    "solution": "Show that P(k+1) holds using P(k).",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1"
+  },
+  {
+    "chapter": "Proof and Induction",
+    "question": "Which statement is false about induction?",
+    "options": ["It proves statements for all n ≥ 1", "It starts with base case", "It assumes result is true", "It proves only even numbers"],
+    "answer": "It proves only even numbers",
+    "solution": "Induction proves for all natural numbers, not just even numbers.",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1"
+  }
+]

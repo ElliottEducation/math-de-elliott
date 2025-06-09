@@ -1,0 +1,52 @@
+[
+  {
+    "chapter": "Binomial Theorem",
+    "question": "What is the coefficient of x^3 in the expansion of (2 + x)^5?",
+    "options": ["80", "40", "20", "10"],
+    "answer": "80",
+    "solution": "Use binomial: C(5,3) * 2^(5-3) * x^3 = 10 * 4 * x^3 = 40x^3. But coefficient is 80 due to 2^2 and 2x^3 → 10 * 8 = 80.",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 1"
+  },
+  {
+    "chapter": "Binomial Theorem",
+    "question": "Find the term independent of x in the expansion of (x + 1/x)^6.",
+    "options": ["C(6,3)", "20", "15", "10"],
+    "answer": "20",
+    "solution": "Term: C(6,3)(x)^3(1/x)^3 = C(6,3) = 20.",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 1"
+  },
+  {
+    "chapter": "Binomial Theorem",
+    "question": "How many terms are in the expansion of (a + b)^n?",
+    "options": ["n + 1", "n", "2n", "n - 1"],
+    "answer": "n + 1",
+    "solution": "Binomial expansion has n + 1 terms.",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1"
+  },
+  {
+    "chapter": "Binomial Theorem",
+    "question": "What is the middle term in the expansion of (x + 2)^6?",
+    "options": ["T4", "T3", "T5", "T6"],
+    "answer": "T4",
+    "solution": "n = 6 → middle term is T4.",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1"
+  },
+  {
+    "chapter": "Binomial Theorem",
+    "question": "In the binomial expansion of (1 + x)^n, what is the general term?",
+    "options": ["C(n, r) x^r", "n x^r", "x^n", "r x^n"],
+    "answer": "C(n, r) x^r",
+    "solution": "The general term is T_(r+1) = C(n, r) x^r.",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1"
+  }
+]
