@@ -51,6 +51,23 @@ if st.button("Logout"):
     st.session_state.user = None
     st.experimental_rerun()
 
+# ====== 升级为 Pro 提示（仅对 Free 用户可见） ======
+if st.session_state.user_role == "free":
+    with st.expander("💡 Upgrade to Pro for full access"):
+        st.markdown("""
+        👋 You are currently using a **Free** account.
+
+        🔓 Upgrade to **Pro** to unlock all modules and view unlimited questions.
+
+        ✅ Access full question sets  
+        ✅ New modules and updates  
+        ✅ Future features and analytics  
+
+        👉 Want to try Pro features? Click below!
+        """)
+        if st.button("✨ Upgrade to Pro (Coming Soon)"):
+            st.info("In the next version, we will add Stripe payment to unlock Pro features.")
+
 # ====== 题库功能区 ======
 
 QUESTION_DIR = "questions"
