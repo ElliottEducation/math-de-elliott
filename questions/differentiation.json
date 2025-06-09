@@ -1,0 +1,52 @@
+[
+  {
+    "chapter": "Differentiation",
+    "question": "Find the derivative of f(x) = 3x^2 + 2x - 5.",
+    "options": ["6x + 2", "3x + 2", "6x - 2", "6x"],
+    "answer": "6x + 2",
+    "solution": "Using basic differentiation rules: f'(x) = d/dx (3x^2) + d/dx (2x) = 6x + 2.",
+    "difficulty": "easy",
+    "year": "Year 11",
+    "level": "Extension 1"
+  },
+  {
+    "chapter": "Differentiation",
+    "question": "If f(x) = sin(x), what is f''(x)?",
+    "options": ["cos(x)", "-sin(x)", "-cos(x)", "sin(x)"],
+    "answer": "-sin(x)",
+    "solution": "f'(x) = cos(x), then f''(x) = d/dx[cos(x)] = -sin(x).",
+    "difficulty": "medium",
+    "year": "Year 11",
+    "level": "Extension 1"
+  },
+  {
+    "chapter": "Differentiation",
+    "question": "Find the derivative of f(x) = ln(x^2 + 1).",
+    "options": ["2x / (x^2 + 1)", "1 / (x^2 + 1)", "2 / x", "ln(2x)"],
+    "answer": "2x / (x^2 + 1)",
+    "solution": "Use chain rule: d/dx ln(u) = u'/u, where u = x^2 + 1, so u' = 2x.",
+    "difficulty": "medium",
+    "year": "Year 11",
+    "level": "Extension 1"
+  },
+  {
+    "chapter": "Differentiation",
+    "question": "Differentiate f(x) = e^(2x).",
+    "options": ["e^(2x)", "2e^(2x)", "x e^(2x)", "e^x"],
+    "answer": "2e^(2x)",
+    "solution": "Use chain rule: d/dx e^u = u' * e^u where u = 2x, so u' = 2.",
+    "difficulty": "easy",
+    "year": "Year 11",
+    "level": "Extension 1"
+  },
+  {
+    "chapter": "Differentiation",
+    "question": "Find the critical points of f(x) = x^3 - 3x^2 + 2.",
+    "options": ["x = 0, 2", "x = 1, 2", "x = 0, 1", "x = -1, 3"],
+    "answer": "x = 0, 2",
+    "solution": "f'(x) = 3x^2 - 6x = 3x(x-2). Set derivative to 0 → x = 0, 2.",
+    "difficulty": "medium",
+    "year": "Year 11",
+    "level": "Extension 1"
+  }
+]
