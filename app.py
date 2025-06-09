@@ -42,12 +42,13 @@ if st.session_state.user is None:
                 "email": email,
                 "full_name": full_name,
                 "user_role": "free"
-            }).execute()
+}).execute()
 
-            if res.error is None:
-                st.success("🎉 Registered successfully! Now login.")
-            else:
-                st.error(f"Registration failed: {res.error.message}")
+if res.status_code == 201:
+    st.success("🎉 Registered successfully! Now login.")
+else:
+    st.error(f"Registration failed. Server response: {res.data}")
+
     st.stop()  # ⛔ 停止渲染题库，直到登录成功
 
 # ========== 登录成功后 ==========
