@@ -3,20 +3,19 @@
 import streamlit as st
 import os
 import json
-from supabase_utils import supabase  # ✅ 确保此模块存在并正确引用 Supabase client
+from supabase_utils import supabase  # ✅ 确保已创建 supabase_utils.py，并正确配置
 
-# 页面配置
+# 页面设置
 st.set_page_config(page_title="HSC Math Question Explorer", layout="centered")
+st.title("📘 HSC Math Question Explorer")
 
-# 登录状态初始化
+# 初始化登录状态
 if "user" not in st.session_state:
     st.session_state.user = None
     st.session_state.user_role = "free"
 
 # ====== 登录界面 ======
 if st.session_state.user is None:
-    st.title("🔐 Welcome to Math de Elliott")
-
     tab1, tab2 = st.tabs(["🔐 Login", "📝 Register"])
 
     with tab1:
@@ -44,12 +43,10 @@ if st.session_state.user is None:
                 st.success("🎉 Registered successfully! Now login.")
             else:
                 st.error("Registration failed. Email may already exist.")
-
     st.stop()  # ⛔ 停止后续题库显示，直到登录
 
 # ====== 登录后内容区 ======
-st.title("📘 HSC Math Question Explorer")
-st.success(f"✅ Logged in as: {st.session_state.user} ({st.session_state.user_role})")
+st.success(f"Logged in as: {st.session_state.user} ({st.session_state.user_role})")
 if st.button("Logout"):
     st.session_state.user = None
     st.experimental_rerun()
@@ -69,7 +66,7 @@ if selected_year != "All":
     levels = sorted([d for d in os.listdir(year_path) if os.path.isdir(os.path.join(year_path, d))])
 selected_level = st.selectbox("📘 Select Level", ["All"] + levels)
 
-# 选择模块
+# 选择模块 + 限制 free 模块可见范围
 modules = []
 module_file_map = {}
 if selected_year != "All" and selected_level != "All":
@@ -78,19 +75,25 @@ if selected_year != "All" and selected_level != "All":
     modules = [f.replace(".json", "").replace("-", " ").title() for f in files]
     module_file_map = dict(zip(modules, files))
 
+    # ✅ 限制 free 用户可见模块
+    if st.session_state.user_role == "free":
+        allowed_modules = ["Functions", "Differentiation"]
+        modules = [m for m in modules if m in allowed_modules]
+        st.warning("🆓 Free users can only access limited modules. Upgrade to Pro for full access.")
+
 selected_module = st.selectbox("📚 Select Module", ["All"] + modules)
 
-# 显示题目
+# 显示题目（题数限制）
 if selected_module != "All":
     json_path = os.path.join(QUESTION_DIR, selected_year, selected_level, module_file_map[selected_module])
     if st.button("🔍 Generate Questions"):
         with open(json_path, "r", encoding="utf-8") as f:
             questions = json.load(f)
 
-            # 限制 free 用户最多查看前 3 道题
+            # ✅ 限制 free 用户每个模块最多显示 3 道题
             if st.session_state.user_role == "free":
                 questions = questions[:3]
-                st.info("🆓 Free users can view 3 questions per module. Upgrade to Pro to unlock all!")
+                st.info("🧪 Free users can view 3 questions per module.")
 
             for i, q in enumerate(questions, 1):
                 st.markdown(f"### Q{i}: {q['question']}")
