@@ -1,63 +1,44 @@
 import streamlit as st
-import json
-import random
 import os
-from utils.question_loader import load_questions
+import json
 
-
-
-
-# -------------------------
-# Page Title and Layout
-# -------------------------
-st.set_page_config(page_title="HSC Math Question Bank", layout="wide")
+st.set_page_config(page_title="HSC Math Question Explorer", layout="centered")
 st.title("📘 HSC Math Question Explorer")
 
-# -------------------------
-# Sidebar Filters
-# -------------------------
-st.sidebar.header("🔍 Filter Questions")
+QUESTION_DIR = "questions"
 
-# Load JSON data
-question_dir = "questions"
-question_files = [f for f in os.listdir(question_dir) if f.endswith(".json")]
+# 自动提取 year
+years = sorted([d for d in os.listdir(QUESTION_DIR) if os.path.isdir(os.path.join(QUESTION_DIR, d))])
+selected_year = st.selectbox("📅 Select Year", ["All"] + years)
 
-all_questions = []
-for file in question_files:
-    with open(os.path.join(question_dir, file), "r", encoding="utf-8") as f:
-        data = json.load(f)
-        all_questions.extend(data)
+# 自动提取 level
+levels = []
+if selected_year != "All":
+    year_path = os.path.join(QUESTION_DIR, selected_year)
+    levels = sorted([d for d in os.listdir(year_path) if os.path.isdir(os.path.join(year_path, d))])
+selected_level = st.selectbox("📘 Select Level", ["All"] + levels)
 
-# Extract unique filter options
-years = sorted(set(q["year"] for q in all_questions))
-levels = sorted(set(q["level"] for q in all_questions))
-chapters = sorted(set(q["chapter"] for q in all_questions))
+# 自动提取 module 文件
+modules = []
+module_file_map = {}
+if selected_year != "All" and selected_level != "All":
+    module_path = os.path.join(QUESTION_DIR, selected_year, selected_level)
+    files = [f for f in os.listdir(module_path) if f.endswith(".json")]
+    modules = [f.replace(".json", "").replace("-", " ").title() for f in files]
+    module_file_map = dict(zip(modules, files))
 
-# Sidebar selectors
-selected_year = st.sidebar.selectbox("📅 Select Year", ["All"] + years)
-selected_level = st.sidebar.selectbox("📘 Select Level", ["All"] + levels)
-selected_chapter = st.sidebar.selectbox("📚 Select Module", ["All"] + chapters)
+selected_module = st.selectbox("📚 Select Module", ["All"] + modules)
 
-# Filter logic
-filtered_questions = [
-    q for q in all_questions
-    if (selected_year == "All" or q["year"] == selected_year)
-    and (selected_level == "All" or q["level"] == selected_level)
-    and (selected_chapter == "All" or q["chapter"] == selected_chapter)
-]
-
-# -------------------------
-# Display Results
-# -------------------------
-if not filtered_questions:
-    st.warning("No questions match your current filters.")
-else:
-    for idx, q in enumerate(filtered_questions, start=1):
-        with st.expander(f"Q{idx}: {q['question']}"):
-            for i, option in enumerate(q["options"]):
-                st.write(f"({chr(65 + i)}) {option}")
-            st.markdown(f"**✅ Answer**: `{q['answer']}`")
-            st.markdown(f"**🧠 Explanation**: {q['solution']}")
-            st.markdown(
-                f"*Difficulty: `{q['difficulty']}` | Year: `{q['year']}` | Level: `{q['level']}`*"
-            )
+# 加载并展示题目
+if selected_module != "All":
+    json_path = os.path.join(QUESTION_DIR, selected_year, selected_level, module_file_map[selected_module])
+    if st.button("🔍 Generate Questions"):
+        with open(json_path, "r", encoding="utf-8") as f:
+            questions = json.load(f)
+            for i, q in enumerate(questions, 1):
+                st.markdown(f"### Q{i}: {q['question']}")
+                for opt in q["options"]:
+                    st.markdown(f"- {opt}")
+                with st.expander("Answer & Solution"):
+                    st.markdown(f"**Answer:** {q['answer']}")
+                    st.markdown(f"**Solution:** {q['solution']}")
