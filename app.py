@@ -35,19 +35,23 @@ if st.session_state.user is None:
 
     # 注册界面
     with tab2:
-        email = st.text_input("Register Email", key="reg_email")
-        full_name = st.text_input("Full Name")
-        if st.button("Register"):
+    email = st.text_input("Register Email", key="reg_email")
+    full_name = st.text_input("Full Name")
+    if st.button("Register"):
+        try:
             res = supabase.table("users").insert({
                 "email": email,
                 "full_name": full_name,
                 "user_role": "free"
-}).execute()
+            }).execute()
 
-if res.status_code == 201:
-    st.success("🎉 Registered successfully! Now login.")
-else:
-    st.error(f"Registration failed. Server response: {res.data}")
+            if res.status_code == 201:
+                st.success("🎉 Registered successfully! Now login.")
+            else:
+                st.error(f"Registration failed. Server response: {res.data}")
+        except Exception as e:
+            st.error(f"❌ Error occurred: {e}")
+
 
     st.stop()  # ⛔ 停止渲染题库，直到登录成功
 
