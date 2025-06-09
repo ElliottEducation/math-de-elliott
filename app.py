@@ -28,7 +28,7 @@ if st.session_state.user is None:
                 st.session_state.user = email
                 st.session_state.user_role = res.data[0]["user_role"]
                 st.success(f"✅ Welcome back, {email}!")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Email not found. Please register first.")
 
