@@ -7,10 +7,6 @@ from supabase_utils import supabase  # ✅ 确保已创建 supabase_utils.py，�
 
 # 页面设置
 st.set_page_config(page_title="HSC Math Question Explorer", layout="centered")
-
-st.write("URL =", os.getenv("SUPABASE_URL"))
-st.write("KEY =", os.getenv("SUPABASE_KEY")[:20] + "...")
-
 st.title("📘 HSC Math Question Explorer")
 
 # 初始化登录状态
