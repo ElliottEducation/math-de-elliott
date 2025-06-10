@@ -3,22 +3,14 @@ import json
 import random
 import os
 import re
-
-def load_questions_from_json(file_path):
-    """加载JSON题目数据"""
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        st.error(f"找不到文件: {file_path}")
-        return []
+from question_loader import load_all_questions, get_available_options
 
 def display_question_with_latex(question_data, question_number):
     """
     显示带有LaTeX渲染的题目
     """
     # 显示题干
-    st.markdown(f"**Q{question_number}:** {question_data['question']}")
+    st.markdown(f"**Q{question_number}:** {question_data.get('question', 'N/A')}")
     
     # 显示选项
     options = question_data.get('options', {})
@@ -43,13 +35,32 @@ def display_question_with_latex(question_data, question_number):
         correct_answer = question_data.get('correct_answer', '')
         solution = question_data.get('solution', '无解释')
         
-        st.markdown(f"**正确答案:** {answer} - {correct_answer}")
+        # 组合答案显示
+        if correct_answer:
+            st.markdown(f"**正确答案:** {answer} - {correct_answer}")
+        else:
+            st.markdown(f"**正确答案:** {answer}")
+        
         st.markdown(f"**解释:** {solution}")
         
         # 显示额外信息
         difficulty = question_data.get('difficulty', 'N/A')
         chapter = question_data.get('chapter', 'N/A')
-        st.markdown(f"**难度:** {difficulty.title()} | **章节:** {chapter}")
+        year = question_data.get('year', 'N/A')
+        level = question_data.get('level', 'N/A')
+        
+        info_parts = []
+        if difficulty != 'N/A':
+            info_parts.append(f"**难度:** {difficulty.title()}")
+        if chapter != 'N/A':
+            info_parts.append(f"**章节:** {chapter}")
+        if year != 'N/A':
+            info_parts.append(f"**年级:** {year}")
+        if level != 'N/A':
+            info_parts.append(f"**级别:** {level}")
+        
+        if info_parts:
+            st.markdown(" | ".join(info_parts))
 
 def filter_questions(questions, year=None, level=None, chapter=None, difficulty=None):
     """根据条件筛选题目"""
@@ -78,18 +89,34 @@ def main():
     st.markdown("*A lightweight, elegant HSC math question generator built with Streamlit*")
     
     # 加载题目数据
-    questions_file = "questions.json"  # 您的JSON文件名
-    all_questions = load_questions_from_json(questions_file)
+    with st.spinner("正在加载题目数据..."):
+        all_questions = load_all_questions()
+        available_options = get_available_options()
     
     if not all_questions:
-        st.error("无法加载题目数据。请确保questions.json文件存在。")
+        st.error("无法加载题目数据。请确保questions文件夹存在并包含JSON文件。")
+        st.info("当前期望的文件结构:")
+        st.code("""
+questions/
+├── year11/
+│   └── extension1/
+│       ├── differentiation.json
+│       └── integration.json
+└── year12/
+    └── extension1/
+        ├── applications-of-calculus.json
+        ├── binomial-theorem.json
+        ├── functions.json
+        ├── proof-and-induction.json
+        └── trigonometry.json
+        """)
         return
     
     # 获取所有可用的选项值
-    years = sorted(list(set(q.get('year', '') for q in all_questions if q.get('year'))))
-    levels = sorted(list(set(q.get('level', '') for q in all_questions if q.get('level'))))
-    chapters = sorted(list(set(q.get('chapter', '') for q in all_questions if q.get('chapter'))))
-    difficulties = sorted(list(set(q.get('difficulty', '') for q in all_questions if q.get('difficulty'))))
+    years = available_options['years']
+    levels = available_options['levels']
+    chapters = available_options['chapters']
+    difficulties = available_options['difficulties']
     
     # 侧边栏设置
     with st.sidebar:
@@ -132,7 +159,7 @@ def main():
             selected_difficulty = None
         
         # 题目数量
-        num_questions = st.slider("🔢 题目数量", 1, 10, 5)
+        num_questions = st.slider("🔢 题目数量", 1, 20, 5)
         
         # 生成题目按钮
         generate_btn = st.button("🎲 生成题目", type="primary")
@@ -145,6 +172,22 @@ def main():
             selected_chapter, selected_difficulty
         ))
         st.markdown(f"**可用题目:** {filtered_count}/{len(all_questions)}")
+        
+        # 显示加载的文件信息
+        if st.checkbox("显示数据源信息"):
+            st.markdown("**数据来源:**")
+            sources = {}
+            for q in all_questions:
+                year = q.get('year', 'Unknown')
+                level = q.get('level', 'Unknown')
+                chapter = q.get('chapter', 'Unknown')
+                key = f"{year}/{level}"
+                if key not in sources:
+                    sources[key] = set()
+                sources[key].add(chapter)
+            
+            for key, chapters in sources.items():
+                st.markdown(f"- **{key}:** {', '.join(sorted(chapters))}")
     
     # 主内容区域
     if generate_btn or 'current_questions' not in st.session_state:
