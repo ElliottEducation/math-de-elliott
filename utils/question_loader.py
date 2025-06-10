@@ -1,123 +1,141 @@
 import json
 import os
-import random
+import streamlit as st
 
 def load_all_questions():
-    """加载所有题目数据从文件夹结构"""
-    all_questions = []
-    questions_dir = "questions"
+    """加载所有问题数据"""
+    questions = []
     
-    if not os.path.exists(questions_dir):
-        print(f"错误: 找不到 {questions_dir} 文件夹")
-        return []
+    # 定义可能的数据文件路径
+    possible_paths = [
+        "data",           # 通常的数据文件夹
+        "questions",      # 问题文件夹
+        "json_files",     # JSON文件夹
+        ".",              # 当前目录
+        "utils/data",     # utils下的数据文件夹
+    ]
     
-    # 遍历年级文件夹 (year11, year12)
-    for year_folder in os.listdir(questions_dir):
-        year_path = os.path.join(questions_dir, year_folder)
-        
-        if not os.path.isdir(year_path):
-            continue
+    for path in possible_paths:
+        if os.path.exists(path) and os.path.isdir(path):
+            # 获取所有JSON文件
+            json_files = [f for f in os.listdir(path) if f.endswith('.json')]
             
-        # 遍历课程类型文件夹 (extension1, extension2, standard2)
-        for course_folder in os.listdir(year_path):
-            course_path = os.path.join(year_path, course_folder)
-            
-            if not os.path.isdir(course_path):
-                continue
-                
-            # 读取所有JSON文件
-            for filename in os.listdir(course_path):
-                if not filename.endswith('.json'):
-                    continue
-                    
-                file_path = os.path.join(course_path, filename)
-                
+            for filename in json_files:
                 try:
+                    file_path = os.path.join(path, filename)
                     with open(file_path, 'r', encoding='utf-8') as f:
                         data = json.load(f)
                         
-                        # 确保数据是列表格式
-                        if isinstance(data, dict):
-                            data = [data]
-                        elif not isinstance(data, list):
-                            continue
+                        # 处理不同的数据格式
+                        if isinstance(data, list):
+                            # 如果是列表，直接扩展
+                            questions.extend(data)
+                        elif isinstance(data, dict):
+                            # 如果是单个对象，添加到列表
+                            questions.append(data)
+                        else:
+                            print(f"警告: 文件 {filename} 包含未知数据格式")
                             
-                        # 为每个问题添加元数据
-                        for question in data:
-                            question['year'] = year_folder
-                            question['level'] = course_folder
-                            question['chapter'] = filename.replace('.json', '').replace('-', ' ').title()
-                            question['source_file'] = filename
-                            
-                            # 如果没有难度信息，设置默认值
-                            if 'difficulty' not in question:
-                                question['difficulty'] = 'medium'
-                                
-                        all_questions.extend(data)
-                        
+                except json.JSONDecodeError as e:
+                    print(f"JSON解析错误 {filename}: {e}")
                 except Exception as e:
-                    print(f"读取文件 {file_path} 时出错: {e}")
-                    continue
+                    print(f"读取文件 {filename} 时出错: {e}")
     
-    print(f"成功加载了 {len(all_questions)} 个问题")
-    return all_questions
+    return questions
 
-def load_questions(level, section, n=10):
-    """兼容旧版本的加载函数"""
-    all_questions = load_all_questions()
+def get_available_options(questions=None):
+    """从问题中提取可用选项"""
+    if questions is None:
+        questions = load_all_questions()
     
-    # 根据级别筛选
-    if level:
-        filtered = [q for q in all_questions if q.get('level', '').lower() == level.lower()]
-    else:
-        filtered = all_questions
+    years = set()
+    levels = set()
+    topics = set()
+    difficulties = set()
     
-    # 根据章节筛选
-    if section:
-        filtered = [q for q in filtered if section.lower() in q.get('chapter', '').lower()]
-    
-    # 随机选择
-    return random.sample(filtered, min(n, len(filtered)))
-
-def get_available_options():
-    """获取所有可用的选项"""
-    all_questions = load_all_questions()
-    
-    if not all_questions:
-        return {
-            'years': [],
-            'levels': [],
-            'chapters': [],
-            'difficulties': []
-        }
-    
-    years = sorted(list(set(q.get('year', '') for q in all_questions if q.get('year'))))
-    levels = sorted(list(set(q.get('level', '') for q in all_questions if q.get('level'))))
-    chapters = sorted(list(set(q.get('chapter', '') for q in all_questions if q.get('chapter'))))
-    difficulties = sorted(list(set(q.get('difficulty', '') for q in all_questions if q.get('difficulty'))))
+    for question in questions:
+        # 提取年级
+        if 'year' in question and question['year']:
+            years.add(str(question['year']))
+        
+        # 提取级别
+        if 'level' in question and question['level']:
+            levels.add(str(question['level']))
+        
+        # 提取主题 (支持 chapter 和 topic 字段)
+        if 'chapter' in question and question['chapter']:
+            topics.add(str(question['chapter']))
+        elif 'topic' in question and question['topic']:
+            topics.add(str(question['topic']))
+        
+        # 提取难度
+        if 'difficulty' in question and question['difficulty']:
+            difficulties.add(str(question['difficulty']))
     
     return {
-        'years': years,
-        'levels': levels,
-        'chapters': chapters,
-        'difficulties': difficulties
+        'years': sorted(list(years)),
+        'levels': sorted(list(levels)),
+        'topics': sorted(list(topics)),
+        'difficulties': sorted(list(difficulties))
     }
 
-# 测试函数
-if __name__ == "__main__":
-    # 测试加载
+def load_questions_by_filters(year=None, level=None, topic=None, difficulty=None):
+    """根据筛选条件加载问题"""
+    all_questions = load_all_questions()
+    filtered_questions = []
+    
+    for question in all_questions:
+        # 检查年级
+        if year and str(question.get('year', '')) != str(year):
+            continue
+        
+        # 检查级别
+        if level and str(question.get('level', '')) != str(level):
+            continue
+        
+        # 检查主题
+        question_topic = question.get('chapter') or question.get('topic', '')
+        if topic and str(question_topic) != str(topic):
+            continue
+        
+        # 检查难度
+        if difficulty and str(question.get('difficulty', '')) != str(difficulty):
+            continue
+        
+        filtered_questions.append(question)
+    
+    return filtered_questions
+
+def validate_question_format(question):
+    """验证问题格式是否正确"""
+    required_fields = ['question']
+    optional_fields = ['options', 'answer', 'solution', 'explanation', 'year', 'level', 'chapter', 'topic', 'difficulty']
+    
+    # 检查必需字段
+    for field in required_fields:
+        if field not in question:
+            return False, f"缺少必需字段: {field}"
+    
+    # 验证选项格式
+    if 'options' in question:
+        options = question['options']
+        if not isinstance(options, (list, dict)):
+            return False, "选项格式不正确，应为列表或字典"
+    
+    return True, "格式正确"
+
+def get_question_stats():
+    """获取问题数据统计"""
     questions = load_all_questions()
-    print(f"加载了 {len(questions)} 个问题")
+    options = get_available_options(questions)
     
-    if questions:
-        print("\n示例问题:")
-        for i, q in enumerate(questions[:3]):
-            print(f"{i+1}. 年级: {q.get('year')}, 级别: {q.get('level')}, 章节: {q.get('chapter')}")
-            print(f"   问题: {q.get('question', 'N/A')[:50]}...")
-            print()
+    stats = {
+        'total_questions': len(questions),
+        'years': len(options['years']),
+        'levels': len(options['levels']),
+        'topics': len(options['topics']),
+        'difficulties': len(options['difficulties']),
+        'available_options': options
+    }
     
-    # 测试选项
-    options = get_available_options()
-    print("可用选项:")
-    for key, values in options.items():
-        print(f"{key}: {values}")
+    return stats
