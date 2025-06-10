@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import json
 from dotenv import load_dotenv
-from supabase_utils import supabase  # ✅ 确保该文件存在并正确导入 create_client
+from supabase_utils import supabase  # ✅ 请确保该文件已正确配置
 
 # ====== 环境配置 ======
 load_dotenv()
@@ -88,12 +88,24 @@ if selected_year != "All" and selected_level != "All":
 
 selected_module = st.selectbox("📚 Select Module", ["All"] + modules)
 
-# 🔍 展示题目
+# ====== LaTeX 渲染函数 ======
+def render_question(q, idx):
+    st.markdown(f"### Q{idx}: {q['question']}", unsafe_allow_html=True)
+    st.markdown("**Options:**", unsafe_allow_html=True)
+    for opt in q["options"]:
+        st.markdown(f"- {opt}", unsafe_allow_html=True)
+    with st.expander("📘 Answer & Solution"):
+        st.markdown(f"**✅ Answer:** {q['answer']}", unsafe_allow_html=True)
+        st.markdown(f"**📝 Solution:** {q['solution']}", unsafe_allow_html=True)
+    st.markdown("---")
+
+# ====== 展示题目 ======
 if selected_module != "All":
     json_path = os.path.join(QUESTION_DIR, selected_year, selected_level, module_file_map[selected_module])
     if st.button("🔍 Generate Questions"):
-        with open(json_path, "r", encoding="utf-8") as f:
-            questions = json.load(f)
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                questions = json.load(f)
 
             # 🆓 Free 用户最多查看 3 道题
             if st.session_state.user_role == "free":
@@ -101,9 +113,6 @@ if selected_module != "All":
                 st.info("🆓 Free users can view 3 questions per module.")
 
             for i, q in enumerate(questions, 1):
-                st.markdown(f"### Q{i}: {q['question']}")
-                for opt in q["options"]:
-                    st.markdown(f"- {opt}")
-                with st.expander("Answer & Solution"):
-                    st.markdown(f"**Answer:** {q['answer']}")
-                    st.markdown(f"**Solution:** {q['solution']}")
+                render_question(q, i)
+        except Exception as e:
+            st.error(f"❌ Failed to load questions: {e}")
