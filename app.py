@@ -90,14 +90,20 @@ selected_module = st.selectbox("📚 Select Module", ["All"] + modules)
 
 # ====== LaTeX 渲染函数 ======
 def render_question(q, idx):
-    st.markdown(f"### Q{idx}: {q['question']}", unsafe_allow_html=True)
-    st.markdown("**Options:**", unsafe_allow_html=True)
+    st.markdown(f"### Q{idx}:")
+    st.latex(q['question'])  # ✅ 纯公式题干
+
+    st.markdown("**Options:**")
     for opt in q["options"]:
-        st.markdown(f"- {opt}", unsafe_allow_html=True)
+        st.latex(opt)  # ✅ 逐个公式选项渲染
+
     with st.expander("📘 Answer & Solution"):
-        st.markdown(f"**✅ Answer:** {q['answer']}", unsafe_allow_html=True)
-        st.markdown(f"**📝 Solution:** {q['solution']}", unsafe_allow_html=True)
+        st.markdown("**✅ Answer:**")
+        st.latex(q["answer"])
+        st.markdown("**📝 Solution:**")
+        st.latex(q["solution"])
     st.markdown("---")
+
 
 # ====== 展示题目 ======
 if selected_module != "All":
