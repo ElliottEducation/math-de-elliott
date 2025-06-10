@@ -90,19 +90,29 @@ selected_module = st.selectbox("📚 Select Module", ["All"] + modules)
 
 # ====== LaTeX 渲染函数 ======
 def render_question(q, idx):
-    st.markdown(f"### Q{idx}:")
-    st.latex(q['question'])  # ✅ 纯公式题干
+    # ✅ 题干用 markdown 显示（支持 LaTeX + 正常文字混排）
+    st.markdown(f"### Q{idx}: {q['question']}", unsafe_allow_html=True)
 
-    st.markdown("**Options:**")
-    for opt in q["options"]:
-        st.latex(opt)  # ✅ 逐个公式选项渲染
+    # ✅ Options 标题
+    st.markdown("**Options:**", unsafe_allow_html=True)
 
+    # ✅ 横向两列展示所有选项
+    num_options = len(q["options"])
+    cols = st.columns(2 if num_options <= 4 else 4)  # 自动适配
+
+    for i, opt in enumerate(q["options"]):
+        with cols[i % len(cols)]:
+            st.latex(opt)
+
+    # ✅ 答案和解析折叠展示
     with st.expander("📘 Answer & Solution"):
         st.markdown("**✅ Answer:**")
         st.latex(q["answer"])
         st.markdown("**📝 Solution:**")
         st.latex(q["solution"])
+
     st.markdown("---")
+
 
 
 # ====== 展示题目 ======
