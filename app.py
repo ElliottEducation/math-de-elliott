@@ -3,7 +3,7 @@ import json
 import random
 import os
 import re
-from question_loader import load_all_questions, get_available_options
+from utils.question_loader import load_all_questions, get_available_options
 
 def display_question_with_latex(question_data, question_number):
     """
