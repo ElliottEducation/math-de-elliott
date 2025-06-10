@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import json
 from dotenv import load_dotenv
-from supabase_utils import supabase  # ✅ 请确保该文件已正确配置
+from supabase_utils import supabase
 
 # ====== 环境配置 ======
 load_dotenv()
@@ -59,18 +59,15 @@ if st.button("Logout"):
 # ====== 题库功能区 ======
 QUESTION_DIR = "questions"
 
-# 📅 自动提取 year
 years = sorted([d for d in os.listdir(QUESTION_DIR) if os.path.isdir(os.path.join(QUESTION_DIR, d))])
 selected_year = st.selectbox("📅 Select Year", ["All"] + years)
 
-# 📘 自动提取 level
 levels = []
 if selected_year != "All":
     year_path = os.path.join(QUESTION_DIR, selected_year)
     levels = sorted([d for d in os.listdir(year_path) if os.path.isdir(os.path.join(year_path, d))])
 selected_level = st.selectbox("📘 Select Level", ["All"] + levels)
 
-# 📚 自动提取 module
 modules = []
 module_file_map = {}
 if selected_year != "All" and selected_level != "All":
@@ -79,7 +76,6 @@ if selected_year != "All" and selected_level != "All":
     all_modules = [f.replace(".json", "").replace("-", " ").title() for f in files]
     module_file_map = dict(zip(all_modules, files))
 
-    # 🚧 限制 Free 用户最多看到前 2 个模块
     if st.session_state.user_role == "free":
         modules = all_modules[:2]
         st.warning("🆓 Free users can view 2 modules only. Upgrade to Pro for full access.")
@@ -91,11 +87,8 @@ selected_module = st.selectbox("📚 Select Module", ["All"] + modules)
 # ====== LaTeX 渲染函数 ======
 def render_question(q, idx):
     option_labels = ['A', 'B', 'C', 'D']
-
-    # ✅ 显示题号与题干（允许混合文字 + LaTeX，题干中应使用 \\( ... \\) 包裹 LaTeX）
     st.markdown(f"### Q{idx}: {q['question']}", unsafe_allow_html=True)
 
-    # ✅ 选项部分：两列并排，LaTeX 居中，标签 A–D
     st.markdown("**Options:**", unsafe_allow_html=True)
     cols = st.columns(2)
 
@@ -108,7 +101,6 @@ def render_question(q, idx):
                 unsafe_allow_html=True
             )
 
-    # ✅ 答案与解析部分
     with st.expander("📘 Answer & Solution"):
         st.markdown("**✅ Answer:**", unsafe_allow_html=True)
         st.latex(q["answer"])
@@ -116,10 +108,6 @@ def render_question(q, idx):
         st.latex(q["solution"])
 
     st.markdown("---")
-
-
-
-
 
 # ====== 展示题目 ======
 if selected_module != "All":
@@ -129,12 +117,12 @@ if selected_module != "All":
             with open(json_path, "r", encoding="utf-8") as f:
                 questions = json.load(f)
 
-            # 🆓 Free 用户最多查看 3 道题
             if st.session_state.user_role == "free":
                 questions = questions[:3]
                 st.info("🆓 Free users can view 3 questions per module.")
 
             for i, q in enumerate(questions, 1):
                 render_question(q, i)
+
         except Exception as e:
             st.error(f"❌ Failed to load questions: {e}")
