@@ -3,7 +3,32 @@ import json
 import random
 import os
 import re
+import inspect
 from utils.question_loader import load_all_questions, get_available_options
+
+def extract_options_from_questions(questions):
+    """从问题数据中提取可用选项"""
+    years = set()
+    levels = set()
+    topics = set()
+    difficulties = set()
+    
+    for question in questions:
+        if 'year' in question and question['year']:
+            years.add(question['year'])
+        if 'level' in question and question['level']:
+            levels.add(question['level'])
+        if 'topic' in question and question['topic']:
+            topics.add(question['topic'])
+        if 'difficulty' in question and question['difficulty']:
+            difficulties.add(question['difficulty'])
+    
+    return {
+        'years': sorted(list(years)),
+        'levels': sorted(list(levels)),
+        'topics': sorted(list(topics)),
+        'difficulties': sorted(list(difficulties))
+    }
 
 def display_question_with_latex(question_data, i):
     """显示单个问题，支持LaTeX渲染"""
@@ -66,21 +91,30 @@ def main():
         if not all_questions:
             st.error("无法加载问题数据，请检查数据文件。")
             return
+        else:
+            st.success(f"成功加载 {len(all_questions)} 道题目")
+            # 显示第一个问题的结构以便调试
+            if len(all_questions) > 0:
+                st.write("第一个问题的数据结构:", all_questions[0])
     except Exception as e:
         st.error(f"加载问题时出错: {str(e)}")
         return
     
     # 获取可用选项
     try:
-        available_options = get_available_options(all_questions)
+        # 检查 get_available_options 函数是否需要参数
+        import inspect
+        sig = inspect.signature(get_available_options)
+        if len(sig.parameters) == 0:
+            # 如果函数不需要参数
+            available_options = get_available_options()
+        else:
+            # 如果函数需要参数
+            available_options = get_available_options(all_questions)
     except Exception as e:
         st.error(f"获取选项时出错: {str(e)}")
-        available_options = {
-            'years': [],
-            'levels': [],
-            'topics': [],
-            'difficulties': []
-        }
+        # 从 all_questions 中手动提取选项
+        available_options = extract_options_from_questions(all_questions)
     
     # 侧边栏过滤器
     st.sidebar.header("筛选条件")
