@@ -4,37 +4,163 @@ import random
 import os
 import re
 import inspect
-from utils.question_loader import load_all_questions, get_available_options
+
+# 临时的数据加载函数，用于调试
+def load_all_questions_debug():
+    """调试版本的数据加载函数"""
+    questions = []
+    
+    # 检查可能的数据文件位置
+    possible_paths = [
+        "data",
+        "questions",
+        ".",
+        "utils",
+        "json_files"
+    ]
+    
+    st.write("🔍 开始搜索数据文件...")
+    
+    for path in possible_paths:
+        st.write(f"检查路径: {path}")
+        if os.path.exists(path):
+            st.write(f"✅ 路径存在: {path}")
+            files = [f for f in os.listdir(path) if f.endswith('.json')]
+            st.write(f"找到 JSON 文件: {files}")
+            
+            for filename in files:
+                try:
+                    file_path = os.path.join(path, filename)
+                    st.write(f"正在读取: {file_path}")
+                    
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        st.write(f"文件 {filename} 数据类型: {type(data)}")
+                        
+                        if isinstance(data, list):
+                            questions.extend(data)
+                            st.write(f"从 {filename} 加载了 {len(data)} 个问题")
+                        elif isinstance(data, dict):
+                            questions.append(data)
+                            st.write(f"从 {filename} 加载了 1 个问题")
+                        else:
+                            st.warning(f"未知数据格式在文件 {filename}")
+                            
+                except Exception as e:
+                    st.error(f"读取文件 {filename} 时出错: {str(e)}")
+        else:
+            st.write(f"❌ 路径不存在: {path}")
+    
+    st.write(f"总共加载了 {len(questions)} 个问题")
+    return questions
+
+def create_sample_data():
+    """创建示例数据用于测试"""
+    sample_questions = [
+        {
+            "chapter": "Differentiation",
+            "question": "Find the derivative of f(x) = 3x^2 + 2x - 5",
+            "options": {
+                "0": "6x + 2",
+                "1": "3x + 2", 
+                "2": "6x - 2",
+                "3": "6x"
+            },
+            "answer": "6x + 2",
+            "solution": "Apply basic rules: f'(x) = d/dx(3x^2) + d/dx(2x) - d/dx(5) = 6x + 2 - 0 = 6x + 2",
+            "difficulty": "easy",
+            "year": "year11",
+            "level": "extension1",
+            "source_file": "differentiation.json"
+        },
+        {
+            "chapter": "Integration", 
+            "question": "Find ∫(2x + 1)dx",
+            "options": {
+                "0": "x^2 + x + C",
+                "1": "2x^2 + x + C",
+                "2": "x^2 + x",
+                "3": "2x + C"
+            },
+            "answer": "x^2 + x + C",
+            "solution": "∫(2x + 1)dx = ∫2x dx + ∫1 dx = x^2 + x + C",
+            "difficulty": "easy",
+            "year": "year12",
+            "level": "advanced",
+            "source_file": "integration.json"
+        },
+        {
+            "chapter": "Algebra",
+            "question": "Solve for x: 2x + 5 = 13",
+            "options": {
+                "0": "x = 4",
+                "1": "x = 8",
+                "2": "x = 6", 
+                "3": "x = 9"
+            },
+            "answer": "x = 4",
+            "solution": "2x + 5 = 13 → 2x = 8 → x = 4",
+            "difficulty": "easy",
+            "year": "year10",
+            "level": "standard",
+            "source_file": "algebra.json"
+        }
+    ]
+    return sample_questions
 
 def extract_options_from_questions(questions):
-    """从问题数据中提取可用选项"""
+    """从问题数据中提取可用选项 - 增强调试版本"""
+    st.write("🔧 开始分析问题数据...")
+    
     years = set()
     levels = set()
     topics = set()
     difficulties = set()
     
-    for question in questions:
-        if 'year' in question and question['year']:
-            years.add(question['year'])
-        if 'level' in question and question['level']:
-            levels.add(question['level'])
-        if 'topic' in question and question['topic']:
-            topics.add(question['topic'])
-        if 'difficulty' in question and question['difficulty']:
-            difficulties.add(question['difficulty'])
+    st.write(f"正在处理 {len(questions)} 个问题")
     
-    return {
+    # 显示前几个问题的结构
+    if questions:
+        st.write("📋 前3个问题的数据结构:")
+        for i, question in enumerate(questions[:3]):
+            st.json(question)
+    
+    for i, question in enumerate(questions):
+        # 检查年级
+        if 'year' in question and question['year']:
+            years.add(str(question['year']))
+            
+        # 检查级别  
+        if 'level' in question and question['level']:
+            levels.add(str(question['level']))
+            
+        # 检查主题 (可能是 chapter 或 topic)
+        if 'chapter' in question and question['chapter']:
+            topics.add(str(question['chapter']))
+        elif 'topic' in question and question['topic']:
+            topics.add(str(question['topic']))
+            
+        # 检查难度
+        if 'difficulty' in question and question['difficulty']:
+            difficulties.add(str(question['difficulty']))
+    
+    result = {
         'years': sorted(list(years)),
-        'levels': sorted(list(levels)),
+        'levels': sorted(list(levels)), 
         'topics': sorted(list(topics)),
         'difficulties': sorted(list(difficulties))
     }
+    
+    st.write("✅ 提取的选项:")
+    st.json(result)
+    
+    return result
 
 def display_question_with_latex(question_data, i):
     """显示单个问题，支持LaTeX渲染"""
     st.write(f"**Q{i}:** {question_data.get('question', '')}")
     
-    # 显示处理
+    # 显示选项
     options = question_data.get('options', [])
     if options:
         col1, col2 = st.columns(2)
@@ -72,7 +198,9 @@ def display_question_with_latex(question_data, i):
     if 'answer' in question_data:
         with st.expander("查看答案"):
             st.write(f"**答案:** {question_data['answer']}")
-            if 'explanation' in question_data:
+            if 'solution' in question_data:
+                st.write(f"**解释:** {question_data['solution']}")
+            elif 'explanation' in question_data:
                 st.write(f"**解释:** {question_data['explanation']}")
 
 def main():
@@ -85,36 +213,54 @@ def main():
     st.title("🧮 HSC Math Question Explorer")
     st.markdown("*A lightweight, elegant HSC math question generator built with Streamlit*")
     
-    # 加载所有问题
-    try:
-        all_questions = load_all_questions()
-        if not all_questions:
-            st.error("无法加载问题数据，请检查数据文件。")
-            return
-        else:
-            st.success(f"成功加载 {len(all_questions)} 道题目")
-            # 显示第一个问题的结构以便调试
-            if len(all_questions) > 0:
-                st.write("第一个问题的数据结构:", all_questions[0])
-    except Exception as e:
-        st.error(f"加载问题时出错: {str(e)}")
+    # 添加调试模式选择
+    debug_mode = st.checkbox("🔧 调试模式", value=True)
+    use_sample_data = st.checkbox("📝 使用示例数据", value=False)
+    
+    # 加载问题数据
+    if use_sample_data:
+        st.info("🔄 使用示例数据进行测试...")
+        all_questions = create_sample_data()
+        st.success(f"✅ 成功创建 {len(all_questions)} 个示例问题")
+    else:
+        st.info("🔄 正在加载实际数据...")
+        try:
+            # 尝试使用原始的加载函数
+            try:
+                from utils.question_loader import load_all_questions
+                all_questions = load_all_questions()
+                st.success(f"✅ 通过 utils.question_loader 加载了 {len(all_questions)} 个问题")
+            except ImportError as e:
+                st.warning(f"⚠️ 无法导入 utils.question_loader: {e}")
+                st.info("🔄 使用调试加载函数...")
+                all_questions = load_all_questions_debug()
+            except Exception as e:
+                st.error(f"❌ utils.question_loader 出错: {e}")
+                st.info("🔄 使用调试加载函数...")
+                all_questions = load_all_questions_debug()
+                
+        except Exception as e:
+            st.error(f"❌ 加载问题时出错: {str(e)}")
+            st.info("🔄 切换到示例数据...")
+            all_questions = create_sample_data()
+    
+    if not all_questions:
+        st.error("❌ 没有可用的问题数据")
+        st.info("💡 建议启用'使用示例数据'选项进行测试")
         return
     
     # 获取可用选项
     try:
-        # 检查 get_available_options 函数是否需要参数
-        import inspect
-        sig = inspect.signature(get_available_options)
-        if len(sig.parameters) == 0:
-            # 如果函数不需要参数
-            available_options = get_available_options()
-        else:
-            # 如果函数需要参数
-            available_options = get_available_options(all_questions)
-    except Exception as e:
-        st.error(f"获取选项时出错: {str(e)}")
-        # 从 all_questions 中手动提取选项
         available_options = extract_options_from_questions(all_questions)
+    except Exception as e:
+        st.error(f"❌ 提取选项时出错: {str(e)}")
+        return
+    
+    # 检查选项是否为空
+    if not any(available_options.values()):
+        st.error("❌ 没有找到任何可用的筛选选项")
+        st.info("请检查数据格式是否正确")
+        return
     
     # 侧边栏过滤器
     st.sidebar.header("筛选条件")
@@ -159,19 +305,20 @@ def main():
     filtered_questions = []
     for question in all_questions:
         # 检查年级
-        if selected_years and question.get('year') not in selected_years:
+        if selected_years and str(question.get('year', '')) not in selected_years:
             continue
         
         # 检查级别
-        if selected_levels and question.get('level') not in selected_levels:
+        if selected_levels and str(question.get('level', '')) not in selected_levels:
             continue
         
-        # 检查主题
-        if selected_topics and question.get('topic') not in selected_topics:
+        # 检查主题 (支持 chapter 和 topic)
+        question_topic = question.get('chapter') or question.get('topic', '')
+        if selected_topics and str(question_topic) not in selected_topics:
             continue
         
         # 检查难度
-        if selected_difficulties and question.get('difficulty') not in selected_difficulties:
+        if selected_difficulties and str(question.get('difficulty', '')) not in selected_difficulties:
             continue
         
         filtered_questions.append(question)
@@ -223,6 +370,11 @@ def main():
         st.write(f"可用级别: {', '.join(available_options.get('levels', []))}")
         st.write(f"可用主题: {', '.join(available_options.get('topics', []))}")
         st.write(f"可用难度: {', '.join(available_options.get('difficulties', []))}")
+        
+        if debug_mode:
+            st.subheader("🔧 调试信息")
+            st.write("当前工作目录:", os.getcwd())
+            st.write("目录下的文件:", os.listdir('.'))
 
 if __name__ == "__main__":
     main()
