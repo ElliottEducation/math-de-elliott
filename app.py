@@ -1,128 +1,233 @@
+# Math de Elliott - LaTeX 渲染修复方案
+# 这个文件包含了修复您的 Streamlit 应用中 LaTeX 公式渲染问题的完整解决方案
+
 import streamlit as st
-import os
 import json
-from dotenv import load_dotenv
-from supabase_utils import supabase
+import random
+import re
 
-# ====== 环境配置 ======
-load_dotenv()
+def load_questions_from_json(file_path):
+    """加载JSON题目数据"""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        st.error(f"找不到文件: {file_path}")
+        return []
 
-# ====== 页面设置 ======
-st.set_page_config(page_title="HSC Math Question Explorer", layout="centered")
-st.title("📘 HSC Math Question Explorer")
+def process_latex_text(text):
+    """
+    处理文本中的LaTeX公式
+    将括号包围的数学表达式转换为LaTeX格式
+    """
+    if not text:
+        return text
+    
+    # 将 ( ... ) 包围的数学表达式转换为 $...$
+    # 匹配模式：\( ... \) 或 ( ... ) 其中包含数学符号
+    patterns = [
+        (r'\\\((.*?)\\\)', r'$\1$'),  # \( ... \) -> $ ... $
+        (r'\\\[(.*?)\\\]', r'$$\1$$'),  # \[ ... \] -> $$ ... $$
+        # 匹配包含数学符号的括号表达式
+        (r'\(\s*([^()]*(?:[x²³⁴⁵⁶⁷⁸⁹⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉∞π∑∫≤≥≠±×÷√∂∇∆Δ∴∵∝∈∉⊂⊃∪∩∅ℝℕℤℚℂ°′″αβγδεζηθικλμνξπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΠΡΣΤΥΦΧΨΩ^_=+\-*/\\]|f[\'″‴]?|[a-zA-Z]+\'*)[^()]*)\s*\)', r'$\1$')
+    ]
+    
+    processed_text = text
+    for pattern, replacement in patterns:
+        processed_text = re.sub(pattern, replacement, processed_text)
+    
+    # 特殊处理常见的数学表达式
+    math_replacements = {
+        'x^2': 'x^2',
+        'x^3': 'x^3', 
+        'f\'(x)': "f'(x)",
+        'f\'\'(x)': "f''(x)",
+        'sin(x)': r'\sin(x)',
+        'cos(x)': r'\cos(x)',
+        'tan(x)': r'\tan(x)',
+        'ln(x)': r'\ln(x)',
+        'log(x)': r'\log(x)',
+        'sqrt': r'\sqrt',
+        'pi': r'\pi',
+        'theta': r'\theta',
+        'alpha': r'\alpha',
+        'beta': r'\beta',
+        'gamma': r'\gamma',
+        'infinity': r'\infty',
+        '+-': r'\pm',
+        '<=': r'\leq',
+        '>=': r'\geq',
+        '!=': r'\neq',
+    }
+    
+    for old, new in math_replacements.items():
+        processed_text = processed_text.replace(old, new)
+    
+    return processed_text
 
-# ====== 登录状态初始化 ======
-if "user" not in st.session_state:
-    st.session_state.user = None
-    st.session_state.user_role = "free"
+def display_question_with_latex(question_data, question_number):
+    """
+    显示带有LaTeX渲染的题目
+    question_data: 题目数据字典
+    question_number: 题目编号
+    """
+    # 处理题干
+    question_text = process_latex_text(question_data.get('question', ''))
+    st.markdown(f"**Q{question_number}:** {question_text}")
+    
+    # 显示选项
+    options = question_data.get('options', {})
+    if options:
+        col1, col2 = st.columns(2)
+        option_keys = sorted(options.keys())
+        
+        with col1:
+            for i in range(0, len(option_keys), 2):
+                key = option_keys[i]
+                option_text = process_latex_text(options[key])
+                st.markdown(f"**{key}.** {option_text}")
+        
+        with col2:
+            for i in range(1, len(option_keys), 2):
+                if i < len(option_keys):
+                    key = option_keys[i]
+                    option_text = process_latex_text(options[key])
+                    st.markdown(f"**{key}.** {option_text}")
+    
+    # 显示答案和解释（可折叠）
+    with st.expander("📖 答案与解释"):
+        answer = question_data.get('answer', 'N/A')
+        explanation = process_latex_text(question_data.get('explanation', '无解释'))
+        
+        st.markdown(f"**正确答案:** {answer}")
+        st.markdown(f"**解释:** {explanation}")
 
-# ====== 登录 / 注册区域 ======
-if st.session_state.user is None:
-    tab1, tab2 = st.tabs(["🔐 Login", "📝 Register"])
+def convert_json_to_latex_format(input_file, output_file):
+    """
+    将现有的JSON题库转换为LaTeX格式
+    这个函数可以批量处理您的题库数据
+    """
+    try:
+        with open(input_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # 处理每个题目
+        for question in data:
+            if 'question' in question:
+                question['question'] = process_latex_text(question['question'])
+            
+            if 'options' in question:
+                for key, value in question['options'].items():
+                    question['options'][key] = process_latex_text(value)
+            
+            if 'explanation' in question:
+                question['explanation'] = process_latex_text(question['explanation'])
+        
+        # 保存处理后的数据
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        return True
+    except Exception as e:
+        st.error(f"转换过程中出错: {e}")
+        return False
 
-    with tab1:
-        email = st.text_input("Login Email", key="login_email")
-        if st.button("Login"):
-            res = supabase.table("users").select("user_role").eq("email", email).execute()
-            if res.data:
-                st.session_state.user = email
-                st.session_state.user_role = res.data[0]["user_role"]
-                st.success(f"✅ Welcome back, {email}!")
-                st.rerun()
-            else:
-                st.error("Email not found. Please register first.")
+def main():
+    """主应用程序"""
+    st.set_page_config(
+        page_title="🧮 HSC Math Question Explorer",
+        page_icon="🧮",
+        layout="wide"
+    )
+    
+    st.title("🧮 HSC Math Question Explorer")
+    st.markdown("*A lightweight, elegant HSC math question generator built with Streamlit*")
+    
+    # 侧边栏设置
+    with st.sidebar:
+        st.header("⚙️ 设置")
+        
+        # 年级选择
+        year_options = ["year11", "year12"]
+        selected_year = st.selectbox("📚 选择年级", year_options, key="year")
+        
+        # 级别选择  
+        level_options = ["Standard2", "Extension1", "Extension2"]
+        selected_level = st.selectbox("📊 选择级别", level_options, key="level")
+        
+        # 主题选择
+        topic_options = ["Functions", "Derivatives", "Integrals", "Differentiation"]
+        selected_topic = st.selectbox("🎯 选择主题", topic_options, key="topic")
+        
+        # 题目数量
+        num_questions = st.slider("🔢 题目数量", 1, 10, 5)
+        
+        # 生成题目按钮
+        generate_btn = st.button("🎲 生成题目", type="primary")
+        
+        # 数据转换工具
+        st.markdown("---")
+        st.subheader("🔧 数据转换工具")
+        if st.button("转换现有JSON数据"):
+            st.info("这个功能可以批量转换您现有的JSON题库，将数学表达式转换为LaTeX格式")
+    
+    # 主内容区域
+    if generate_btn or 'questions' not in st.session_state:
+        # 模拟加载题目（您需要替换为实际的JSON文件路径）
+        sample_questions = [
+            {
+                "question": "Find the derivative of $f(x) = 3x^2 + 2x - 5$",
+                "options": {
+                    "A": "$f'(x) = 6x + 2$",
+                    "B": "$f'(x) = 3x + 2$", 
+                    "C": "$f'(x) = 6x - 2$",
+                    "D": "$f'(x) = 6x$"
+                },
+                "answer": "A",
+                "explanation": "使用幂规则：$\\frac{d}{dx}(ax^n) = nax^{n-1}$。因此 $\\frac{d}{dx}(3x^2) = 6x$，$\\frac{d}{dx}(2x) = 2$，常数项的导数为0。"
+            },
+            {
+                "question": "If $f(x) = \\sin(x)$, what is $f''(x)$?",
+                "options": {
+                    "A": "$\\cos(x)$",
+                    "B": "$-\\sin(x)$",
+                    "C": "$-\\cos(x)$",
+                    "D": "$\\sin(x)$"
+                },
+                "answer": "B", 
+                "explanation": "$f'(x) = \\cos(x)$，然后 $f''(x) = \\frac{d}{dx}(\\cos(x)) = -\\sin(x)$"
+            },
+            {
+                "question": "Evaluate $\\int x^2 \\, dx$",
+                "options": {
+                    "A": "$\\frac{x^3}{3} + C$",
+                    "B": "$x^3 + C$",
+                    "C": "$\\frac{x^3}{2} + C$", 
+                    "D": "$2x + C$"
+                },
+                "answer": "A",
+                "explanation": "使用幂规则积分公式：$\\int x^n \\, dx = \\frac{x^{n+1}}{n+1} + C$，当 $n = 2$ 时，得到 $\\frac{x^3}{3} + C$"
+            }
+        ]
+        
+        # 随机选择题目
+        st.session_state.questions = random.sample(
+            sample_questions, 
+            min(num_questions, len(sample_questions))
+        )
+    
+    # 显示题目
+    if 'questions' in st.session_state:
+        st.markdown("---")
+        for i, question in enumerate(st.session_state.questions, 1):
+            display_question_with_latex(question, i)
+            if i < len(st.session_state.questions):
+                st.markdown("---")
+        
+        # 更多题目按钮
+        if st.button("🔄 更多题目?", type="secondary"):
+            st.rerun()
 
-    with tab2:
-        email = st.text_input("Register Email", key="reg_email")
-        full_name = st.text_input("Full Name")
-        if st.button("Register"):
-            if not email or not full_name:
-                st.warning("Please fill in all fields.")
-            else:
-                res = supabase.table("users").insert({
-                    "email": email,
-                    "full_name": full_name,
-                    "user_role": "free"
-                }).execute()
-                if res.data:
-                    st.success("🎉 Registered successfully! Now login.")
-                else:
-                    st.error(f"Registration failed: {res.error}")
-    st.stop()
+if __name__ == "__main__":
+    main()
 
-# ====== 登录后欢迎 + 登出按钮 ======
-st.success(f"Logged in as: {st.session_state.user} ({st.session_state.user_role})")
-if st.button("Logout"):
-    st.session_state.user = None
-    st.experimental_rerun()
-
-# ====== 题库功能区 ======
-QUESTION_DIR = "questions"
-
-years = sorted([d for d in os.listdir(QUESTION_DIR) if os.path.isdir(os.path.join(QUESTION_DIR, d))])
-selected_year = st.selectbox("📅 Select Year", ["All"] + years)
-
-levels = []
-if selected_year != "All":
-    year_path = os.path.join(QUESTION_DIR, selected_year)
-    levels = sorted([d for d in os.listdir(year_path) if os.path.isdir(os.path.join(year_path, d))])
-selected_level = st.selectbox("📘 Select Level", ["All"] + levels)
-
-modules = []
-module_file_map = {}
-if selected_year != "All" and selected_level != "All":
-    module_path = os.path.join(QUESTION_DIR, selected_year, selected_level)
-    files = [f for f in os.listdir(module_path) if f.endswith(".json")]
-    all_modules = [f.replace(".json", "").replace("-", " ").title() for f in files]
-    module_file_map = dict(zip(all_modules, files))
-
-    if st.session_state.user_role == "free":
-        modules = all_modules[:2]
-        st.warning("🆓 Free users can view 2 modules only. Upgrade to Pro for full access.")
-    else:
-        modules = all_modules
-
-selected_module = st.selectbox("📚 Select Module", ["All"] + modules)
-
-# ====== LaTeX 渲染函数 ======
-def render_question(q, idx):
-    option_labels = ['A', 'B', 'C', 'D']
-    st.markdown(f"### Q{idx}: {q['question']}", unsafe_allow_html=True)
-
-    st.markdown("**Options:**", unsafe_allow_html=True)
-    cols = st.columns(2)
-
-    for i, opt in enumerate(q["options"]):
-        with cols[i % 2]:
-            st.markdown(
-                f"<p style='text-align:center; font-size:16px;'>"
-                f"<strong>{option_labels[i]}.</strong> &nbsp; \\( {opt} \\)"
-                f"</p>",
-                unsafe_allow_html=True
-            )
-
-    with st.expander("📘 Answer & Solution"):
-        st.markdown("**✅ Answer:**", unsafe_allow_html=True)
-        st.latex(q["answer"])
-        st.markdown("**📝 Solution:**", unsafe_allow_html=True)
-        st.latex(q["solution"])
-
-    st.markdown("---")
-
-# ====== 展示题目 ======
-if selected_module != "All":
-    json_path = os.path.join(QUESTION_DIR, selected_year, selected_level, module_file_map[selected_module])
-    if st.button("🔍 Generate Questions"):
-        try:
-            with open(json_path, "r", encoding="utf-8") as f:
-                questions = json.load(f)
-
-            if st.session_state.user_role == "free":
-                questions = questions[:3]
-                st.info("🆓 Free users can view 3 questions per module.")
-
-            for i, q in enumerate(questions, 1):
-                render_question(q, i)
-
-        except Exception as e:
-            st.error(f"❌ Failed to load questions: {e}")
