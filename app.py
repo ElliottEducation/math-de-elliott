@@ -91,23 +91,24 @@ selected_module = st.selectbox("📚 Select Module", ["All"] + modules)
 # ====== LaTeX 渲染函数 ======
 def render_question(q, idx):
     option_labels = ['A', 'B', 'C', 'D']
-    
-    # ✅ 题干处理
-    if "\\(" in q["question"] or "\\int" in q["question"] or "f(x)" in q["question"]:
-        st.markdown(f"### Q{idx}: {q['question']}", unsafe_allow_html=True)
-    else:
-        st.markdown(f"### Q{idx}:")
-        st.latex(q["question"])  # 如果是纯公式
 
-    # ✅ 选项横向两列展示（使用 st.latex 保证渲染）
+    # ✅ 显示题号与题干（允许混合文字 + LaTeX，题干中应使用 \\( ... \\) 包裹 LaTeX）
+    st.markdown(f"### Q{idx}: {q['question']}", unsafe_allow_html=True)
+
+    # ✅ 选项部分：两列并排，LaTeX 居中，标签 A–D
     st.markdown("**Options:**", unsafe_allow_html=True)
     cols = st.columns(2)
+
     for i, opt in enumerate(q["options"]):
         with cols[i % 2]:
-            st.markdown(f"**{option_labels[i]}.**", unsafe_allow_html=True)
-            st.latex(opt)  # ✅ 永远用 st.latex() 来渲染数学选项
+            st.markdown(
+                f"<p style='text-align:center; font-size:16px;'>"
+                f"<strong>{option_labels[i]}.</strong> &nbsp; \\( {opt} \\)"
+                f"</p>",
+                unsafe_allow_html=True
+            )
 
-    # ✅ 答案与解析
+    # ✅ 答案与解析部分
     with st.expander("📘 Answer & Solution"):
         st.markdown("**✅ Answer:**", unsafe_allow_html=True)
         st.latex(q["answer"])
@@ -115,6 +116,7 @@ def render_question(q, idx):
         st.latex(q["solution"])
 
     st.markdown("---")
+
 
 
 
