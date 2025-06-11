@@ -1,0 +1,32 @@
+[
+  {
+    "question": "What is the future value of an annuity with payment $P$, interest rate $r$, and $n$ periods?",
+    "options": [
+      "$P \\cdot \\frac{(1+r)^n - 1}{r}$",
+      "$P \\cdot (1+r)^n$",
+      "$P \\cdot \\frac{r}{(1+r)^n}$",
+      "$P \\cdot n$"
+    ],
+    "answer": "$P \\cdot \\frac{(1+r)^n - 1}{r}$",
+    "solution": "Use annuity future value formula.",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Financial Modelling"
+  },
+  {
+    "question": "What does APR stand for in financial contexts?",
+    "options": [
+      "Annual Percentage Rate",
+      "Applied Principal Ratio",
+      "Average Profit Ratio",
+      "Adjusted Periodic Return"
+    ],
+    "answer": "Annual Percentage Rate",
+    "solution": "APR = Annual Percentage Rate.",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Financial Modelling"
+  }
+]

@@ -1,52 +1,32 @@
 [
   {
-    "chapter": "Trigonometry",
-    "question": "Solve for x: sin(x) = 0.5, 0 ≤ x ≤ π.",
-    "options": ["π/6 and 5π/6", "π/4 and 3π/4", "π/3 and 2π/3", "π/2 only"],
-    "answer": "π/6 and 5π/6",
-    "solution": "sin(x) = 0.5 → x = π/6 and 5π/6 in [0, π].",
+    "question": "Simplify $\\sin^2(x) + \\cos^2(x)$.",
+    "options": [
+      "$1$",
+      "$0$",
+      "$\\tan(x)$",
+      "$\\sec(x)$"
+    ],
+    "answer": "$1$",
+    "solution": "Trigonometric identity: $\\sin^2(x) + \\cos^2(x) = 1$",
     "difficulty": "easy",
     "year": "Year 12",
-    "level": "Extension 1"
+    "level": "Extension 1",
+    "chapter": "Trigonometric Functions"
   },
   {
-    "chapter": "Trigonometry",
-    "question": "Simplify: sin^2(x) + cos^2(x).",
-    "options": ["1", "0", "2", "sin(2x)"],
-    "answer": "1",
-    "solution": "Identity: sin²x + cos²x = 1.",
-    "difficulty": "easy",
-    "year": "Year 12",
-    "level": "Extension 1"
-  },
-  {
-    "chapter": "Trigonometry",
-    "question": "Differentiate f(x) = tan(x).",
-    "options": ["sec^2(x)", "sin(x)", "cos(x)", "sec(x)tan(x)"],
-    "answer": "sec^2(x)",
-    "solution": "d/dx tan(x) = sec²(x).",
+    "question": "Evaluate $\\sin(2x)$ if $\\sin(x) = 3/5$ and $x$ is in Quadrant I.",
+    "options": [
+      "$24/25$",
+      "$6/5$",
+      "$12/25$",
+      "$24/25$"
+    ],
+    "answer": "$24/25$",
+    "solution": "$\\sin(2x) = 2\\sin(x)\\cos(x)$, and $\\cos(x) = 4/5$",
     "difficulty": "medium",
     "year": "Year 12",
-    "level": "Extension 1"
-  },
-  {
-    "chapter": "Trigonometry",
-    "question": "Evaluate ∫ sec^2(x) dx.",
-    "options": ["tan(x)", "sec(x)", "ln|sec(x)|", "sin(x)"],
-    "answer": "tan(x)",
-    "solution": "∫ sec²x dx = tan(x) + C.",
-    "difficulty": "easy",
-    "year": "Year 12",
-    "level": "Extension 1"
-  },
-  {
-    "chapter": "Trigonometry",
-    "question": "Find the period of f(x) = 2sin(3x).",
-    "options": ["2π/3", "π", "2π", "3π"],
-    "answer": "2π/3",
-    "solution": "Period = 2π / coefficient of x = 2π/3.",
-    "difficulty": "medium",
-    "year": "Year 12",
-    "level": "Extension 1"
+    "level": "Extension 1",
+    "chapter": "Trigonometric Functions"
   }
 ]

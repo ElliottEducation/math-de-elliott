@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Prove by induction: $1 + 2 + 3 + \\dots + n = \\frac{n(n+1)}{2}$",
+    "options": [
+      "Prove base case and inductive step",
+      "Try all n by hand",
+      "Use differentiation",
+      "Use integration"
+    ],
+    "answer": "Prove base case and inductive step",
+    "solution": "Base case: $n=1$ holds. Assume true for $n=k$, prove for $n=k+1$.",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Mathematical Induction"
+  },
+  {
+    "question": "Which principle is used in mathematical induction?",
+    "options": [
+      "Recursive construction",
+      "Base case and implication",
+      "Contradiction",
+      "Least upper bound"
+    ],
+    "answer": "Base case and implication",
+    "solution": "Induction requires proving $P(1)$ and $P(k)\\Rightarrow P(k+1)$",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Mathematical Induction"
+  }
+]
