@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Evaluate the integral $\\int x^1 \\, dx$.",
+    "options": [
+      "$x^2$",
+      "$\\frac{x^2}{2}$",
+      "$\\ln|x|$",
+      "$\\frac{1}{x}$"
+    ],
+    "answer": "$\\frac{x^2}{2}$",
+    "solution": "Use the power rule: $\\int x^1 \\, dx = \\frac{x^2}{2} + C$",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Integration"
+  },
+  {
+    "question": "Evaluate the integral $\\int x^2 \\, dx$.",
+    "options": [
+      "$x^3$",
+      "$\\frac{x^3}{3}$",
+      "$\\ln|x|$",
+      "$\\frac{1}{x}$"
+    ],
+    "answer": "$\\frac{x^3}{3}$",
+    "solution": "Use the power rule: $\\int x^2 \\, dx = \\frac{x^3}{3} + C$",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Integration"
+  }
+]
