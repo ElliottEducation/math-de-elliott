@@ -1,0 +1,27 @@
+[
+  {
+    "question": "Find the dot product of $\\vec{a} = \\langle 1, 2, 3 \\rangle$ and $\\vec{b} = \\langle 4, 5, 6 \\rangle$.",
+    "options": ["$32$", "$38$", "$45$", "$28$"],
+    "answer": "$32$",
+    "solution": "$1\\cdot4 + 2\\cdot5 + 3\\cdot6 = 4 + 10 + 18 = 32$",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 2",
+    "chapter": "Vectors in 3D"
+  },
+  {
+    "question": "What is the scalar projection of $\\vec{a}$ onto $\\vec{b}$?",
+    "options": [
+      "$\\frac{\\vec{a} \\cdot \\vec{b}}{\\|\\vec{b}\\|}$",
+      "$\\vec{a} \\cdot \\vec{b}$",
+      "$\\|\\vec{a}\\|$",
+      "$\\|\\vec{b}\\|$"
+    ],
+    "answer": "$\\frac{\\vec{a} \\cdot \\vec{b}}{\\|\\vec{b}\\|}$",
+    "solution": "Scalar projection = $\\vec{a} \\cdot \\hat{b} = \\frac{\\vec{a} \\cdot \\vec{b}}{\\|\\vec{b}\\|}$",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 2",
+    "chapter": "Vectors in 3D"
+  }
+]
