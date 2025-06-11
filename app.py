@@ -2,6 +2,9 @@ import streamlit as st
 import json
 import os
 
+from utils.question_loader import load_questions_from_directory
+question_data = load_questions_from_directory("questions")
+
 # --- Page Configuration ---
 st.set_page_config(page_title="Math de Elliott", layout="centered")
 
