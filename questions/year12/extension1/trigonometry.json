@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Simplify $\\sin^2(x) + \\cos^2(x)$.",
+    "options": [
+      "$1$",
+      "$0$",
+      "$\\tan(x)$",
+      "$\\sec(x)$"
+    ],
+    "answer": "$1$",
+    "solution": "Trigonometric identity: $\\sin^2(x) + \\cos^2(x) = 1$",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Trigonometric Functions"
+  },
+  {
+    "question": "Evaluate $\\sin(2x)$ if $\\sin(x) = 3/5$ and $x$ is in Quadrant I.",
+    "options": [
+      "$24/25$",
+      "$6/5$",
+      "$12/25$",
+      "$24/25$"
+    ],
+    "answer": "$24/25$",
+    "solution": "$\\sin(2x) = 2\\sin(x)\\cos(x)$, and $\\cos(x) = 4/5$",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Trigonometric Functions"
+  }
+]
