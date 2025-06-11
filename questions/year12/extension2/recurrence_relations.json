@@ -1,0 +1,27 @@
+[
+  {
+    "question": "Given $a_n = 2a_{n-1} + 1$, $a_1 = 1$. Find $a_2$.",
+    "options": ["$3$", "$5$", "$2$", "$1$"],
+    "answer": "$3$",
+    "solution": "$a_2 = 2a_1 + 1 = 2(1) + 1 = 3$",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 2",
+    "chapter": "Recurrence Relations"
+  },
+  {
+    "question": "Which method solves recurrence relations?",
+    "options": [
+      "Substitution and iteration",
+      "Differentiation",
+      "Integration by parts",
+      "Graphing"
+    ],
+    "answer": "Substitution and iteration",
+    "solution": "Iterate values or guess closed form.",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 2",
+    "chapter": "Recurrence Relations"
+  }
+]
