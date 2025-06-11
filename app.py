@@ -17,29 +17,39 @@ free_modules = [
 # --------- 👤 Login + Register UI ---------
 if "user" not in st.session_state:
     st.markdown("### 🔐 Login or Register")
+
+    st.info("🧪 Free demo chapters available:\n"
+            "- `Year 12 Extension 1 → trigonometric`\n"
+            "- `Year 12 Extension 2 → harder_questions`\n\n"
+            "👉 Try these before subscribing!")
+
     tab1, tab2 = st.tabs(["🔑 Login", "🆕 Register"])
 
     with tab1:
-        login_email = st.text_input("Login Email", key="login_email")
-        if st.button("Login"):
-            user = login_user(login_email)
-            if user:
-                st.success(f"✅ Welcome back, {login_email}!")
-                st.session_state.user = user
-                st.rerun()
-            else:
-                st.error("Login failed.")
+        login_email = st.text_input("Login Email", key="login_email", max_chars=50,
+                                    placeholder="you@example.com")
+        col_login = st.columns([2, 1, 2])[1]
+        with col_login:
+            if st.button("Login"):
+                user = login_user(login_email)
+                if user:
+                    st.success(f"✅ Welcome back, {login_email}!")
+                    st.session_state.user = user
+                    st.rerun()
+                else:
+                    st.error("Login failed. Please register first.")
 
     with tab2:
-        register_email = st.text_input("Register Email", key="register_email")
-        if st.button("Register"):
-            user = register_user(register_email)
-            if user:
-                st.success(f"🎉 Registration complete for {register_email}!")
-                st.session_state.user = user
-                st.rerun()
-            else:
-                st.error("Registration failed.")
+        register_email = st.text_input("Register Email", key="register_email", max_chars=50,
+                                       placeholder="you@example.com")
+        col_register = st.columns([2, 1, 2])[1]
+        with col_register:
+            if st.button("Register"):
+                user = register_user(register_email)
+                if user:
+                    st.success("🎉 Registration complete. Please login now.")
+                else:
+                    st.error("Registration failed.")
 
     st.stop()
 
