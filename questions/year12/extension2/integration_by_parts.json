@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Use integration by parts: $\\int x e^x \\, dx$",
+    "options": [
+      "$x e^x - e^x + C$",
+      "$e^x + C$",
+      "$x^2 e^x + C$",
+      "$\\frac{x e^x}{2} + C$"
+    ],
+    "answer": "$x e^x - e^x + C$",
+    "solution": "Let $u = x$, $dv = e^x dx$. Then $du = dx$, $v = e^x$.",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 2",
+    "chapter": "Integration by Parts"
+  },
+  {
+    "question": "Find $\\int \\ln x \\, dx$.",
+    "options": [
+      "$x \\ln x - x + C$",
+      "$\\ln^2 x + C$",
+      "$\\frac{1}{x} + C$",
+      "$x \\ln x + C$"
+    ],
+    "answer": "$x \\ln x - x + C$",
+    "solution": "Integration by parts with $u = \\ln x$, $dv = dx$.",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 2",
+    "chapter": "Integration by Parts"
+  }
+]
