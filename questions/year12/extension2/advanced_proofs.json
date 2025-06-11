@@ -1,0 +1,27 @@
+[
+  {
+    "question": "Use contradiction to prove: $\\sqrt{2}$ is irrational.",
+    "options": [
+      "Assume it is rational, derive contradiction",
+      "Differentiate both sides",
+      "Use induction",
+      "Graph the function"
+    ],
+    "answer": "Assume it is rational, derive contradiction",
+    "solution": "Assume $\\sqrt{2} = \\frac{a}{b}$ in lowest terms, get contradiction.",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 2",
+    "chapter": "Advanced Proofs"
+  },
+  {
+    "question": "Which method proves inequality: $n^2 > n + 1$ for $n > 1$?",
+    "options": ["Induction", "Contradiction", "Calculus", "Graphing"],
+    "answer": "Induction",
+    "solution": "Use base case and $P(k) \\Rightarrow P(k+1)$ logic.",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 2",
+    "chapter": "Advanced Proofs"
+  }
+]
