@@ -14,7 +14,7 @@ free_modules = [
     ("year12", "extension2", "harder_questions")
 ]
 
-# --------- 👤 Login + Register UI ---------
+# --------- 👤 Login + Register UI (Improved layout) ---------
 if "user" not in st.session_state:
     st.markdown("### 🔐 Login or Register")
 
@@ -26,10 +26,10 @@ if "user" not in st.session_state:
     tab1, tab2 = st.tabs(["🔑 Login", "🆕 Register"])
 
     with tab1:
-        login_email = st.text_input("Login Email", key="login_email", max_chars=50,
-                                    placeholder="you@example.com")
-        col_login = st.columns([2, 1, 2])[1]
-        with col_login:
+        st.markdown("#### 🔐 Login to Your Account")
+        login_col1, login_col2, login_col3 = st.columns([2, 3, 2])
+        with login_col2:
+            login_email = st.text_input("Login Email", key="login_email", placeholder="you@example.com")
             if st.button("Login"):
                 user = login_user(login_email)
                 if user:
@@ -40,10 +40,10 @@ if "user" not in st.session_state:
                     st.error("Login failed. Please register first.")
 
     with tab2:
-        register_email = st.text_input("Register Email", key="register_email", max_chars=50,
-                                       placeholder="you@example.com")
-        col_register = st.columns([2, 1, 2])[1]
-        with col_register:
+        st.markdown("#### 🆕 Create a New Account")
+        reg_col1, reg_col2, reg_col3 = st.columns([2, 3, 2])
+        with reg_col2:
+            register_email = st.text_input("Register Email", key="register_email", placeholder="you@example.com")
             if st.button("Register"):
                 user = register_user(register_email)
                 if user:
