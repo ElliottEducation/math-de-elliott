@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Solve the differential equation $\\frac{dy}{dx} = 3x^2$.",
+    "options": [
+      "$y = x^3 + C$",
+      "$y = 3x + C$",
+      "$y = x^2 + C$",
+      "$y = \\frac{3x^3}{2} + C$"
+    ],
+    "answer": "$y = x^3 + C$",
+    "solution": "Integrate both sides: $y = \\int 3x^2 dx = x^3 + C$",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Differential Equations"
+  },
+  {
+    "question": "Which method is best for solving $\\frac{dy}{dx} = ky$?",
+    "options": [
+      "Separation of variables",
+      "Chain rule",
+      "Integration by parts",
+      "Binomial expansion"
+    ],
+    "answer": "Separation of variables",
+    "solution": "This is a separable first-order differential equation.",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Differential Equations"
+  }
+]
