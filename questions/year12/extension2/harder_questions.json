@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Let $z = 1 + i$. Find $z^4$.",
+    "options": [
+      "$-4$",
+      "$-2$",
+      "$4$",
+      "$2$"
+    ],
+    "answer": "$-4$",
+    "solution": "Convert to polar form: $z = \\sqrt{2} e^{i\\pi/4}$, then raise to 4.",
+    "difficulty": "hard",
+    "year": "Year 12",
+    "level": "Extension 2",
+    "chapter": "Harder Problems"
+  },
+  {
+    "question": "Evaluate $\\int_0^\\infty x e^{-x} dx$.",
+    "options": [
+      "$1$",
+      "$0$",
+      "$\\infty$",
+      "$-1$"
+    ],
+    "answer": "$1$",
+    "solution": "Standard Gamma integral: $\\Gamma(2) = 1! = 1$",
+    "difficulty": "hard",
+    "year": "Year 12",
+    "level": "Extension 2",
+    "chapter": "Harder Problems"
+  }
+]
