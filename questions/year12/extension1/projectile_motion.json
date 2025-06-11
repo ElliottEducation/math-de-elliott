@@ -1,0 +1,32 @@
+[
+  {
+    "question": "A projectile is launched with speed $u = 20\\,m/s$ at angle $\\theta = 45^\\circ$. Find time of flight.",
+    "options": [
+      "$\\frac{2u \\sin \\theta}{g}$",
+      "$\\frac{u^2 \\sin(2\\theta)}{g}$",
+      "$\\frac{u \\cos \\theta}{g}$",
+      "$\\frac{2u \\cos \\theta}{g}$"
+    ],
+    "answer": "$\\frac{2u \\sin \\theta}{g}$",
+    "solution": "Time of flight: $T = \\frac{2u \\sin \\theta}{g}$",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Projectile Motion"
+  },
+  {
+    "question": "At maximum height, which component of velocity is zero?",
+    "options": [
+      "Vertical",
+      "Horizontal",
+      "Both",
+      "None"
+    ],
+    "answer": "Vertical",
+    "solution": "At top of path, vertical velocity becomes 0, horizontal remains constant.",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Projectile Motion"
+  }
+]
