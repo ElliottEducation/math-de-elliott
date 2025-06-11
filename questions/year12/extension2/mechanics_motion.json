@@ -1,0 +1,32 @@
+[
+  {
+    "question": "A body of mass $m$ under resistive force $F = -kv$. What kind of motion is this?",
+    "options": [
+      "Exponential decay",
+      "Linear motion",
+      "Constant acceleration",
+      "Uniform motion"
+    ],
+    "answer": "Exponential decay",
+    "solution": "This is a first-order linear DE: $\\frac{dv}{dt} = -kv$",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 2",
+    "chapter": "Mechanics and Motion"
+  },
+  {
+    "question": "Which equation models SHM?",
+    "options": [
+      "$\\frac{d^2x}{dt^2} + \\omega^2 x = 0$",
+      "$x = vt$",
+      "$\\frac{dv}{dt} = -kv$",
+      "$F = ma$"
+    ],
+    "answer": "$\\frac{d^2x}{dt^2} + \\omega^2 x = 0$",
+    "solution": "This is the standard SHM equation.",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 2",
+    "chapter": "Mechanics and Motion"
+  }
+]
