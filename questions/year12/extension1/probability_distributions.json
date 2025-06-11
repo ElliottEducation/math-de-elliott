@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Let $X \\sim B(n=5, p=0.4)$. Find $P(X=2)$.",
+    "options": [
+      "$\\binom{5}{2} (0.4)^2 (0.6)^3$",
+      "$\\binom{5}{2} (0.6)^2 (0.4)^3$",
+      "$\\binom{5}{2} (0.4)^3 (0.6)^2$",
+      "$\\binom{5}{2} (0.6)^5$"
+    ],
+    "answer": "$\\binom{5}{2} (0.4)^2 (0.6)^3$",
+    "solution": "Use binomial probability formula: $P(X=k) = \\binom{n}{k} p^k (1-p)^{n-k}$",
+    "difficulty": "medium",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Probability Distributions"
+  },
+  {
+    "question": "In a normal distribution, what percentage lies within 1 standard deviation?",
+    "options": [
+      "68%",
+      "50%",
+      "95%",
+      "99.7%"
+    ],
+    "answer": "68%",
+    "solution": "Empirical Rule: 68–95–99.7 rule",
+    "difficulty": "easy",
+    "year": "Year 12",
+    "level": "Extension 1",
+    "chapter": "Probability Distributions"
+  }
+]
