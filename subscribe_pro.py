@@ -4,23 +4,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# 设置 Stripe 密钥
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-
-# 从环境变量中读取 Price ID
 MONTHLY_PRICE_ID = os.getenv("STRIPE_MONTHLY_PRICE_ID")
 YEARLY_PRICE_ID = os.getenv("STRIPE_YEARLY_PRICE_ID")
 
-def create_checkout_session(plan="monthly"):
+def create_checkout_session(email, billing_period="monthly"):
     try:
         domain_url = os.getenv("DOMAIN_URL").rstrip("/")
+        price_id = MONTHLY_PRICE_ID if billing_period == "monthly" else YEARLY_PRICE_ID
 
-        # 根据传入的 plan 参数选择价格 ID
-        price_id = MONTHLY_PRICE_ID if plan == "monthly" else YEARLY_PRICE_ID
-
-        # 创建 Stripe Checkout 会话
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
+            customer_email=email,  # ⭐ 将用户邮箱用于 Stripe 账户识别
             line_items=[{
                 "price": price_id,
                 "quantity": 1,
