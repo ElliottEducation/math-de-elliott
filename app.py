@@ -1,11 +1,21 @@
 import streamlit as st
 import os
-import json
-import random
-from supabase_utils import login_user, register_user
+from dotenv import load_dotenv
+from supabase import create_client
+from utils.question_loader import load_questions
 
-st.set_page_config(page_title="Math de Elliott – HSC Practice", layout="wide")
-st.title("📘 Math de Elliott – HSC Practice Questions")
+# Load environment variables
+load_dotenv()
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+# Initialize Supabase client
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+st.set_page_config(page_title="Math de Elliott – HSC Practice Questions", layout="wide")
+st.markdown("""
+    <h1 style='font-size: 36px;'>📘 Math de Elliott – HSC Practice Questions</h1>
+""", unsafe_allow_html=True)
 
 # --------- 🔐 Simulated Subscription ---------
 is_subscribed = False
@@ -14,118 +24,102 @@ free_modules = [
     ("year12", "extension2", "harder_questions")
 ]
 
-# --------- 👤 Login + Register UI (Improved layout) ---------
+# Session state setup
 if "user" not in st.session_state:
-    st.markdown("### 🔐 Login or Register")
+    st.session_state.user = None
+if "page" not in st.session_state:
+    st.session_state.page = 1
 
-    st.info("🧪 Free demo chapters available:\n"
-            "- `Year 12 Extension 1 → trigonometric`\n"
-            "- `Year 12 Extension 2 → harder_questions`\n\n"
-            "👉 Try these before subscribing!")
+# ---- Login/Register Logic ----
+def login_section():
+    st.subheader("🔐 Login or Register")
 
-    tab1, tab2 = st.tabs(["🔑 Login", "🆕 Register"])
+    with st.container():
+        st.markdown("""
+        <div style="background-color:#eaf2fb; padding:10px; border-radius:8px;">
+        <b>🖋️ Free demo chapters available:</b><br>
+        • Year 12 Extension 1 → <code>trigonometric</code><br>
+        • Year 12 Extension 2 → <code>harder_questions</code><br><br>
+        👉 Try these before subscribing!
+        </div>
+        """, unsafe_allow_html=True)
 
-    with tab1:
-        st.markdown("#### 🔐 Login to Your Account")
-        login_col1, login_col2, login_col3 = st.columns([2, 3, 2])
-        with login_col2:
-            login_email = st.text_input("Login Email", key="login_email", placeholder="you@example.com")
-            if st.button("Login"):
-                user = login_user(login_email)
-                if user:
-                    st.success(f"✅ Welcome back, {login_email}!")
-                    st.session_state.user = user
-                    st.rerun()
-                else:
-                    st.error("Login failed. Please register first.")
+    tabs = st.tabs(["🔑 Login", "🆕 Register"])
 
-    with tab2:
-        st.markdown("#### 🆕 Create a New Account")
-        reg_col1, reg_col2, reg_col3 = st.columns([2, 3, 2])
-        with reg_col2:
-            register_email = st.text_input("Register Email", key="register_email", placeholder="you@example.com")
-            if st.button("Register"):
-                user = register_user(register_email)
-                if user:
-                    st.success("🎉 Registration complete. Please login now.")
-                else:
-                    st.error("Registration failed.")
+    with tabs[0]:
+        st.subheader("🔐 Login to Your Account")
+        login_email = st.text_input("Login Email", placeholder="you@example.com", key="login_email")
+        if st.button("Login"):
+            response = supabase.auth.sign_in_with_otp({"email": login_email})
+            st.success(f"✅ Welcome, {login_email}! Please check your inbox for a login link.")
+            st.session_state.user = login_email  # Simulate login
 
+    with tabs[1]:
+        st.subheader("🆕 Register a New Account")
+        register_email = st.text_input("Register Email", placeholder="you@example.com", key="register_email")
+        if st.button("Register"):
+            response = supabase.auth.sign_up({"email": register_email})
+            if response.get("error"):
+                st.error("❌ Registration failed. This email may already be registered.")
+            else:
+                st.success("✅ Registered successfully! Please check your email to verify.")
+
+if not st.session_state.user:
+    login_section()
     st.stop()
 
-# --------- 🧠 Dropdown Menus ---------
-BASE_DIR = "questions"
-question_tree = {}
+# ---- Main App Logic ----
+st.markdown("---")
+st.subheader("📚 Select Year / Level / Module")
 
-for year in os.listdir(BASE_DIR):
-    y_path = os.path.join(BASE_DIR, year)
-    if os.path.isdir(y_path):
-        question_tree[year] = {}
-        for level in os.listdir(y_path):
-            l_path = os.path.join(y_path, level)
-            if os.path.isdir(l_path):
-                modules = [f[:-5] for f in os.listdir(l_path) if f.endswith(".json")]
-                question_tree[year][level] = modules
+col1, col2, col3 = st.columns(3)
+with col1:
+    year = st.selectbox("🗓 Select Year", ["year11", "year12"], index=1)
+with col2:
+    level = st.selectbox("📘 Select Level", ["extension1", "extension2"], index=0)
+with col3:
+    module = st.selectbox("📂 Select Module", sorted(
+        [f.replace(".json", "") for f in os.listdir(f"questions/{year}/{level}") if f.endswith(".json")]
+    ))
 
-year = st.selectbox("📅 Select Year", sorted(question_tree.keys()))
-level = st.selectbox("📘 Select Level", sorted(question_tree[year].keys()))
-module = st.selectbox("📂 Select Module", sorted(question_tree[year][level]))
+# Load and Display Questions
+question_path = f"questions/{year}/{level}/{module}.json"
+questions = load_questions(question_path)
 
-# --------- 📄 Load Questions ---------
-json_path = os.path.join(BASE_DIR, year, level, f"{module}.json")
-
-if not os.path.exists(json_path):
-    st.error("❌ Question file not found.")
+if not questions:
+    st.error("❌ No questions found in this module.")
     st.stop()
 
-with open(json_path, "r", encoding="utf-8") as f:
-    questions = json.load(f)
+# Restrict content if not subscribed and not demo module
+if not is_subscribed and (year, level, module) not in free_modules:
+    st.warning("⚠️ This is a premium module. Only 3 sample questions are shown.")
+    questions = questions[:3]
 
-# --------- 🔐 Subscription Access Control ---------
-if not is_subscribed:
-    if (year, level, module) in free_modules:
-        st.warning(f"""
-        💡 You're accessing a premium module: **{module.replace('_', ' ').title()}**
-
-        Only 3 sample questions are available:
-        - 1 x Easy
-        - 1 x Medium
-        - 1 x Hard
-
-        🔓 To unlock full access:
-        👉 [Subscribe Monthly (Simulated)](https://example.com/month)
-        👉 [Subscribe Yearly (Simulated)](https://example.com/year)
-        """)
-        sample = {}
-        for q in questions:
-            d = q.get("difficulty", "").lower()
-            if d in ["easy", "medium", "hard"] and d not in sample:
-                sample[d] = q
-        questions = list(sample.values())
-    else:
-        st.error("🔒 This module is only available to subscribers.")
-        st.stop()
-
-# --------- 📊 Pagination ---------
+# Pagination
 questions_per_page = 5
-total_pages = max(1, (len(questions) - 1) // questions_per_page + 1)
-page = st.number_input("📑 Page", min_value=1, max_value=total_pages, value=1)
-
-start = (page - 1) * questions_per_page
+start = (st.session_state.page - 1) * questions_per_page
 end = start + questions_per_page
-display_questions = questions[start:end]
+paged_questions = questions[start:end]
 
-# --------- ✅ Show Questions ---------
-for idx, q in enumerate(display_questions, start=1):
-    st.markdown(f"### Question {idx}")
+# Render Questions
+for idx, q in enumerate(paged_questions):
+    st.markdown(f"### Question {start + idx + 1}")
     st.markdown(q["question"])
-    selected_option = st.radio(f"Choose your answer for Q{idx}:", q["options"], key=f"q{idx}")
-
-    if st.button(f"Submit Q{idx}"):
-        if selected_option == q["answer"]:
+    selected = st.radio(f"Choose your answer for Q{idx+1}:", q["options"], key=f"q{idx}")
+    if st.button(f"Submit Q{idx+1}"):
+        if selected == q["answer"]:
             st.success("✅ Correct!")
         else:
             st.error("❌ Incorrect.")
-
     with st.expander("💡 Hint"):
-        st.markdown(q["solution"])
+        st.markdown(q["hint"])
+
+# Page navigation
+st.markdown("---")
+col_left, col_right = st.columns([1, 1])
+with col_left:
+    if st.button("⬅️ Previous") and st.session_state.page > 1:
+        st.session_state.page -= 1
+with col_right:
+    if st.button("Next ➡️") and end < len(questions):
+        st.session_state.page += 1
