@@ -3,23 +3,21 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 import os
 import stripe
-from subscribe_pro import create_checkout_session
+from subscribe_pro import create_checkout_session, upgrade_user_role
+from urllib.parse import urlparse, parse_qs
 
+# ---------- 🔧 加载配置 ----------
 load_dotenv()
-
-# ---------- 🔧 Supabase 设置 ----------
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# ---------- 🔧 Stripe 设置 ----------
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-
-# ---------- 🚪 页面切换变量 ----------
+# ---------- 🧠 页面状态初始化 ----------
 if "page" not in st.session_state:
     st.session_state.page = "login"
 
-# ---------- 👤 登录功能 ----------
+# ---------- 👤 登录 ----------
 def login():
     st.title("🔐 Login to Math de Elliott")
 
@@ -43,7 +41,7 @@ def login():
     if st.button("Go to Register"):
         st.session_state.page = "register"
 
-# ---------- 🆕 注册功能 ----------
+# ---------- 🆕 注册 ----------
 def register():
     st.title("📝 Register for Math de Elliott")
 
@@ -63,36 +61,61 @@ def register():
     if st.button("Back to Login"):
         st.session_state.page = "login"
 
-# ---------- 🧠 主页面内容 ----------
+# ---------- 🧠 主页面 ----------
 def main_app():
-    st.title("📚 Welcome to Math de Elliott")
-
     email = st.session_state.get("email", "user@example.com")
-
+    st.title("📚 Welcome to Math de Elliott")
     st.markdown(f"### 👋 Hello, {email}")
 
-    # 🚀 升级为 Pro 订阅按钮
-    st.markdown("### 💳 Upgrade to Pro Plan")
+    # ✅ 检查用户身份
+    user_role = get_user_role(email)
 
-    col1, col2 = st.columns(2)
+    if is_payment_success():
+        upgraded = upgrade_user_role(email)
+        if upgraded:
+            st.success("🎉 You have been upgraded to Pro!")
 
-    with col1:
-        if st.button("Subscribe Monthly ($20/month)"):
-            checkout_url = create_checkout_session(email, billing_period="monthly")
-            if checkout_url:
-                st.success("Redirecting to Stripe...")
-                st.markdown(f"[Click to pay]({checkout_url})", unsafe_allow_html=True)
+    # 🔒 显示订阅按钮
+    if user_role != "pro":
+        st.warning("⚠️ You are on the Free Plan. Upgrade to access all questions!")
+        col1, col2 = st.columns(2)
 
-    with col2:
-        if st.button("Subscribe Yearly ($199/year)"):
-            checkout_url = create_checkout_session(email, billing_period="yearly")
-            if checkout_url:
-                st.success("Redirecting to Stripe...")
-                st.markdown(f"[Click to pay]({checkout_url})", unsafe_allow_html=True)
+        with col1:
+            if st.button("Subscribe Monthly ($20/month)"):
+                checkout_url = create_checkout_session(email, billing_period="monthly")
+                if checkout_url:
+                    st.success("Redirecting to Stripe...")
+                    st.markdown(f"[👉 Click to Pay]({checkout_url})", unsafe_allow_html=True)
+
+        with col2:
+            if st.button("Subscribe Yearly ($199/year)"):
+                checkout_url = create_checkout_session(email, billing_period="yearly")
+                if checkout_url:
+                    st.success("Redirecting to Stripe...")
+                    st.markdown(f"[👉 Click to Pay]({checkout_url})", unsafe_allow_html=True)
+
+    # ✅ Pro 用户可以访问全部功能
+    if user_role == "pro":
+        st.success("🌟 You are a Pro user. Full access granted!")
+        st.markdown("🔓 Here is your full access to all modules and features.")
+        # 👉 在这里加载你所有 premium 功能模块
 
     if st.button("Logout"):
         st.session_state.clear()
         st.rerun()
+
+# ---------- 🔍 获取用户角色 ----------
+def get_user_role(email):
+    try:
+        result = supabase.table("users").select("user_role").eq("email", email).single().execute()
+        return result.data.get("user_role", "free")
+    except Exception:
+        return "free"
+
+# ---------- ✅ 检查是否支付成功回调 ----------
+def is_payment_success():
+    query_params = st.experimental_get_query_params()
+    return query_params.get("success", ["false"])[0] == "true" and "email" in query_params
 
 # ---------- 🔁 页面导航 ----------
 if st.session_state.page == "login":
