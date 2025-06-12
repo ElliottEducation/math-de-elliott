@@ -1,125 +1,100 @@
 import streamlit as st
 import os
-from dotenv import load_dotenv
-from supabase import create_client
 from utils.question_loader import load_questions
+from supabase_utils import login_user, register_user
+from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-# Initialize Supabase client
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+st.set_page_config(page_title="Math de Elliott – HSC Practice Questions", layout="centered")
 
-st.set_page_config(page_title="Math de Elliott – HSC Practice Questions", layout="wide")
-st.markdown("""
-    <h1 style='font-size: 36px;'>📘 Math de Elliott – HSC Practice Questions</h1>
-""", unsafe_allow_html=True)
+st.title("📘 Math de Elliott – HSC Practice Questions")
+st.write("Practice HSC Mathematics by selecting year, level, and topic. Each page shows 5 questions with hints.")
 
-# --------- 🔐 Simulated Subscription ---------
+# Simulated subscription control
 is_subscribed = False
 free_modules = [
     ("year12", "extension1", "trigonometric"),
     ("year12", "extension2", "harder_questions")
 ]
 
-# Session state setup
-if "user" not in st.session_state:
-    st.session_state.user = None
-if "page" not in st.session_state:
-    st.session_state.page = 1
+# User session state
+if "user_email" not in st.session_state:
+    st.session_state.user_email = None
 
-# ---- Login/Register Logic ----
-def login_section():
+# ========== LOGIN / REGISTER ==========
+if not st.session_state.user_email:
     st.subheader("🔐 Login or Register")
+    st.info("📝 **Free demo chapters available:**\n"
+            "- Year 12 Extension 1 ➜ `trigonometric`\n"
+            "- Year 12 Extension 2 ➜ `harder_questions`\n\n"
+            "👉 Try these before subscribing!")
 
-    with st.container():
-        st.markdown("""
-        <div style="background-color:#eaf2fb; padding:10px; border-radius:8px;">
-        <b>🖋️ Free demo chapters available:</b><br>
-        • Year 12 Extension 1 → <code>trigonometric</code><br>
-        • Year 12 Extension 2 → <code>harder_questions</code><br><br>
-        👉 Try these before subscribing!
-        </div>
-        """, unsafe_allow_html=True)
-
-    tabs = st.tabs(["🔑 Login", "🆕 Register"])
-
-    with tabs[0]:
-        st.subheader("🔐 Login to Your Account")
-        login_email = st.text_input("Login Email", placeholder="you@example.com", key="login_email")
+    tab1, tab2 = st.tabs(["🔑 Login", "🆕 Register"])
+    with tab1:
+        st.subheader("🔐 Login to Your Account", anchor=False)
+        email = st.text_input("Login Email", placeholder="you@example.com", label_visibility="collapsed")
         if st.button("Login"):
-            response = supabase.auth.sign_in_with_otp({"email": login_email})
-            st.success(f"✅ Welcome, {login_email}! Please check your inbox for a login link.")
-            st.session_state.user = login_email  # Simulate login
-
-    with tabs[1]:
-        st.subheader("🆕 Register a New Account")
-        register_email = st.text_input("Register Email", placeholder="you@example.com", key="register_email")
-        if st.button("Register"):
-            response = supabase.auth.sign_up({"email": register_email})
-            if response.get("error"):
-                st.error("❌ Registration failed. This email may already be registered.")
+            if login_user(email):
+                st.session_state.user_email = email
+                st.success(f"Welcome back, {email}!")
+                st.experimental_rerun()
             else:
-                st.success("✅ Registered successfully! Please check your email to verify.")
+                st.error("Login failed. Please try again or register.")
 
-if not st.session_state.user:
-    login_section()
+    with tab2:
+        st.subheader("✍️ Register a New Account", anchor=False)
+        new_email = st.text_input("Register Email", placeholder="you@example.com", label_visibility="collapsed", key="reg")
+        if st.button("Register"):
+            if register_user(new_email):
+                st.success("✅ Registered! Please return to Login tab.")
+            else:
+                st.warning("Registration may have failed. Try again.")
     st.stop()
 
-# ---- Main App Logic ----
-st.markdown("---")
+# ========== LOGGED-IN CONTENT ==========
+
+# Sidebar Filters
 st.subheader("📚 Select Year / Level / Module")
-
 col1, col2, col3 = st.columns(3)
+
 with col1:
-    year = st.selectbox("🗓 Select Year", ["year11", "year12"], index=1)
+    selected_year = st.selectbox("📅 Select Year", ["year11", "year12"])
 with col2:
-    level = st.selectbox("📘 Select Level", ["extension1", "extension2"], index=0)
+    selected_level = st.selectbox("📘 Select Level", ["extension1", "extension2"])
 with col3:
-    module = st.selectbox("📂 Select Module", sorted(
-        [f.replace(".json", "") for f in os.listdir(f"questions/{year}/{level}") if f.endswith(".json")]
-    ))
+    module_dir = os.path.join("questions", selected_year, selected_level)
+    if os.path.exists(module_dir):
+        available_modules = [f.replace(".json", "") for f in os.listdir(module_dir) if f.endswith(".json")]
+        selected_module = st.selectbox("📂 Select Module", available_modules)
+    else:
+        st.warning("Module path not found.")
+        st.stop()
 
-# Load and Display Questions
-question_path = f"questions/{year}/{level}/{module}.json"
-questions = load_questions(question_path)
-
-if not questions:
-    st.error("❌ No questions found in this module.")
-    st.stop()
-
-# Restrict content if not subscribed and not demo module
-if not is_subscribed and (year, level, module) not in free_modules:
+# Determine access
+is_free_module = (selected_year, selected_level, selected_module) in free_modules
+if not is_subscribed and not is_free_module:
     st.warning("⚠️ This is a premium module. Only 3 sample questions are shown.")
-    questions = questions[:3]
 
-# Pagination
-questions_per_page = 5
-start = (st.session_state.page - 1) * questions_per_page
-end = start + questions_per_page
-paged_questions = questions[start:end]
+# Load and display questions
+questions = load_questions(selected_year, selected_level, selected_module)
+page = st.number_input("📄 Page", min_value=1, max_value=len(questions) // 5 + 1, step=1)
 
-# Render Questions
-for idx, q in enumerate(paged_questions):
-    st.markdown(f"### Question {start + idx + 1}")
-    st.markdown(q["question"])
-    selected = st.radio(f"Choose your answer for Q{idx+1}:", q["options"], key=f"q{idx}")
-    if st.button(f"Submit Q{idx+1}"):
-        if selected == q["answer"]:
+start = (page - 1) * 5
+end = start + (5 if is_subscribed or is_free_module else 3)
+
+for i, q in enumerate(questions[start:end], start=1):
+    st.markdown(f"### Question {i}")
+    st.markdown(q["question"], unsafe_allow_html=True)
+    selected_option = st.radio("Choose your answer for Q{}:".format(i), q["options"], key=f"q{i}")
+    if st.button(f"Submit Q{i}"):
+        if selected_option == q["answer"]:
             st.success("✅ Correct!")
         else:
             st.error("❌ Incorrect.")
-    with st.expander("💡 Hint"):
-        st.markdown(q["hint"])
 
-# Page navigation
-st.markdown("---")
-col_left, col_right = st.columns([1, 1])
-with col_left:
-    if st.button("⬅️ Previous") and st.session_state.page > 1:
-        st.session_state.page -= 1
-with col_right:
-    if st.button("Next ➡️") and end < len(questions):
-        st.session_state.page += 1
+    if "hint" in q:
+        with st.expander("💡 Hint"):
+            st.markdown(q["hint"], unsafe_allow_html=True)
+    else:
+        st.info("ℹ️ No hint available for this question.")
