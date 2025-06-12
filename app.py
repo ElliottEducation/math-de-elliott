@@ -92,7 +92,7 @@ def main_app():
 
     if st.button("Logout"):
         st.session_state.clear()
-        st.experimental_rerun()
+        st.rerun()
 
 # ---------- 🔁 页面导航 ----------
 if st.session_state.page == "login":
