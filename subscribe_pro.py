@@ -22,24 +22,26 @@ DOMAIN_URL = os.getenv("DOMAIN_URL").rstrip("/")
 # 创建 Stripe Checkout 会话
 def create_checkout_session(email, billing_period="monthly"):
     try:
+        domain_url = os.getenv("DOMAIN_URL").rstrip("/")
         price_id = MONTHLY_PRICE_ID if billing_period == "monthly" else YEARLY_PRICE_ID
 
-        session = stripe.checkout.Session.create(
+        checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             line_items=[{
                 "price": price_id,
                 "quantity": 1,
             }],
             mode="subscription",
-            success_url=f"{DOMAIN_URL}/?success=true&email={email}",
-            cancel_url=f"{DOMAIN_URL}/?canceled=true",
+            success_url=f"{domain_url}/?success=true&email={email}",
+            cancel_url=f"{domain_url}/?canceled=true",
         )
 
-        return session.url
+        return checkout_session.url
 
     except Exception as e:
         print("❌ Stripe Checkout Error:", str(e))
         return None
+
 
 
 # 支付成功后：更新 Supabase 中的用户身份
